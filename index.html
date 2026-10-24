@@ -3,375 +3,543 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Хронометрія «Колонії» — марсіанський календар і конвертер дат</title>
 <meta name="description" content="Переводить марсіанські дати з роману Макса Кідрука «Колонія» («Телець 17, 46») у земні й навпаки за правилами додатка «Хронометрія».">
 <link rel="canonical" href="https://ever-c0de.github.io/kolonia-mars-calendar/">
 <meta name="google-site-verification" content="06g8AXfxpH4HV4e8S4uxwOIumJFxK2W4AjlBq-PmonQ">
+<meta name="theme-color" content="#07080C">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://ever-c0de.github.io/kolonia-mars-calendar/">
 <meta property="og:locale" content="uk_UA">
 <meta property="og:site_name" content="Хронометрія «Колонії»">
 <meta property="og:title" content="Хронометрія «Колонії» — марсіанський календар і конвертер дат">
-<meta name="twitter:card" content="summary">
 <meta property="og:description" content="Переводить марсіанські дати з роману Макса Кідрука «Колонія» («Телець 17, 46») у земні й навпаки за правилами додатка «Хронометрія».">
-<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2213%22%20fill%3D%22%23B4532A%22%2F%3E%3Cpath%20d%3D%22M6%2013c5%202%2013%202%2020-1%22%20stroke%3D%22%237A2E14%22%20stroke-width%3D%222.4%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%2F%3E%3Ccircle%20cx%3D%2220%22%20cy%3D%2220%22%20r%3D%222.6%22%20fill%3D%22%237A2E14%22%2F%3E%3C%2Fsvg%3E">
-<style>
-:root { color-scheme: light; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
-body { margin: 0; }
-img { max-width: 100%; }
-[hidden] { display: none !important; }
-</style>
-<title>Хронометрія «Колонії» — марсіанський календар і конвертер дат</title>
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2307080C'/%3E%3Cellipse cx='16' cy='16' rx='12' ry='11' fill='none' stroke='%23E9B27C' stroke-width='1.6' opacity='.7'/%3E%3Ccircle cx='16' cy='16' r='3.2' fill='%23FFC56B'/%3E%3Ccircle cx='25.4' cy='10.5' r='3.6' fill='%23E2683C'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600&family=Onest:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geologica:wght@300..600&family=Martian+Mono:wght@400..600&family=Tektur:wght@500..800&display=swap">
 <style>
-/* Layout: mission chronometer. A "now on Mars" readout in the header band, two converter consoles side by side,
-   then the year ribbon (months to scale), the month table and the method notes. */
+/* Layout: a mission HUD over a starfield. Hero = live "now on Mars" readout + orbital year dial (after fig. 1 of the book);
+   then the converter console with two tabs, the twelve-month grid, the method slider, Martian time, and notes at the end. */
 :root {
-  --bg: #ECEEF2;
-  --surface: #FBFBFC;
-  --sunken: #E2E6ED;
-  --ink: #18202E;
-  --muted: #556073;
-  --line: #CBD2DC;
-  --rust: #A3411B;      /* regolith */
-  --sky: #2A5A97;       /* Martian sunset blue */
-  --spring: #5F8F47;
-  --summer: #B98A1F;
-  --autumn: #B0532A;
-  --winter: #4E78B0;
-  --dust: #B48A5E;
-  --on-accent: #FFFFFF;
-  --font-display: "Unbounded", "Segoe UI", "Arial Black", sans-serif;
-  --font-body: "Onest", "Segoe UI", Roboto, system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", "Cascadia Mono", Consolas, ui-monospace, monospace;
-  --step--1: 0.8125rem;
-  --step-0: 1rem;
-  --step-1: 1.1875rem;
-  --step-2: 1.5rem;
-  --step-3: 2rem;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #0F131A; --surface: #171C25; --sunken: #1F2531; --ink: #E5E8EE; --muted: #9AA3B5; --line: #2C3445;
-    --rust: #E58A62; --sky: #8CB2E8; --spring: #8DBB72; --summer: #DDB24E; --autumn: #DE7E54; --winter: #7FA4DA;
-    --dust: #9C7E5F; --on-accent: #10141B; color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --bg: #0F131A; --surface: #171C25; --sunken: #1F2531; --ink: #E5E8EE; --muted: #9AA3B5; --line: #2C3445;
-  --rust: #E58A62; --sky: #8CB2E8; --spring: #8DBB72; --summer: #DDB24E; --autumn: #DE7E54; --winter: #7FA4DA;
-  --dust: #9C7E5F; --on-accent: #10141B; color-scheme: dark;
+  --void: #07080C;
+  --panel: #0D1017;
+  --panel-2: #131824;
+  --well: #05060A;
+  --line: #232B3A;
+  --line-2: #34405A;
+  --ink: #EEF1F6;
+  --muted: #A3ACBD;
+  --dim: #808A9D;
+  --mars: #E2683C;
+  --mars-hi: #F07B50;
+  --dust: #E9B27C;
+  --ice: #8EC5E8;
+  --spring: #9BCB7E;
+  --summer: #E9C46A;
+  --autumn: #E07A4F;
+  --winter: #86B8E0;
+  --on-accent: #140A05;
+  --font-display: "Tektur", "Bahnschrift", "Segoe UI", sans-serif;
+  --font-body: "Geologica", "Segoe UI", Roboto, system-ui, sans-serif;
+  --font-mono: "Martian Mono", "Cascadia Mono", Consolas, ui-monospace, monospace;
+  color-scheme: dark;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 *, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
 body {
-  background: var(--bg);
+  margin: 0;
+  min-height: 100vh;
+  background: var(--void);
   color: var(--ink);
-  font: 400 var(--step-0)/1.55 var(--font-body);
+  font: 400 1rem/1.6 var(--font-body);
   -webkit-font-smoothing: antialiased;
 }
+[hidden] { display: none !important; }
+p { margin: 0; }
+a { color: var(--ice); text-underline-offset: 3px; }
+:focus-visible { outline: 2px solid var(--ice); outline-offset: 3px; }
+h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; text-wrap: balance; }
+.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+#stars { position: fixed; inset: 0; z-index: -2; pointer-events: none; }
+.glow {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(55vmax 45vmax at 88% 6%, rgba(226, 104, 60, .17), transparent 62%),
+    radial-gradient(40vmax 34vmax at 4% 96%, rgba(142, 197, 232, .06), transparent 62%);
+}
 .wrap {
-  max-width: 72rem;
+  max-width: 76rem;
   margin-inline: auto;
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
 }
-p { margin: 0; }
-a { color: var(--sky); text-underline-offset: 2px; }
-:focus-visible { outline: 2px solid var(--sky); outline-offset: 2px; }
-.mono { font-family: var(--font-mono); }
-.sub { color: var(--muted); }
-
-/* Header band */
-.band { background: var(--surface); border-bottom: 1px solid var(--line); }
-.head {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 20rem);
-  gap: 1.5rem 3rem;
-  align-items: end;
-  padding-block: 2.25rem 2rem;
-}
-@media (max-width: 54rem) { .head { grid-template-columns: minmax(0, 1fr); align-items: start; } }
 .eyebrow {
-  font: 500 var(--step--1)/1.3 var(--font-body);
-  letter-spacing: .08em;
+  font: 500 .75rem/1.3 var(--font-mono);
+  letter-spacing: .14em;
   text-transform: uppercase;
-  color: var(--rust);
-  margin-bottom: .75rem;
+  color: var(--dust);
 }
-h1 {
-  font: 600 clamp(1.75rem, 1.2rem + 2.4vw, 2.75rem)/1.08 var(--font-display);
-  letter-spacing: -.01em;
-  margin: 0 0 .85rem;
-  text-wrap: balance;
-}
-.lede { max-width: 62ch; color: var(--muted); }
-.now {
-  min-width: 0;
-  padding: 1rem 1.25rem 1.1rem;
+
+/* HUD panel with corner brackets */
+.hud {
+  position: relative;
+  background: linear-gradient(180deg, rgba(19, 24, 36, .9), rgba(13, 16, 23, .9));
   border: 1px solid var(--line);
-  border-radius: 10px;
-  background: var(--sunken);
-  display: grid;
-  gap: .3rem;
 }
-.label {
-  font: 600 .75rem/1.2 var(--font-body);
-  letter-spacing: .08em;
+.hud::before {
+  --k: var(--mars);
+  content: "";
+  position: absolute;
+  inset: -1px;
+  pointer-events: none;
+  background:
+    linear-gradient(var(--k), var(--k)) 0 0 / 16px 2px no-repeat,
+    linear-gradient(var(--k), var(--k)) 0 0 / 2px 16px no-repeat,
+    linear-gradient(var(--k), var(--k)) 100% 0 / 16px 2px no-repeat,
+    linear-gradient(var(--k), var(--k)) 100% 0 / 2px 16px no-repeat,
+    linear-gradient(var(--k), var(--k)) 0 100% / 16px 2px no-repeat,
+    linear-gradient(var(--k), var(--k)) 0 100% / 2px 16px no-repeat,
+    linear-gradient(var(--k), var(--k)) 100% 100% / 16px 2px no-repeat,
+    linear-gradient(var(--k), var(--k)) 100% 100% / 2px 16px no-repeat;
+}
+
+/* Top bar */
+.topbar { border-bottom: 1px solid var(--line); background: rgba(7, 8, 12, .55); backdrop-filter: blur(8px); }
+.topbar-in { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 3.75rem; }
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: .65rem;
+  min-height: 44px;
+  color: var(--ink);
+  text-decoration: none;
+  font: 600 .9375rem/1 var(--font-display);
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+.topbar nav { display: flex; gap: .15rem; }
+.topbar nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: .5rem .75rem;
+  color: var(--muted);
+  text-decoration: none;
+  font-size: .875rem;
+  border-radius: 3px;
+  transition: color .2s, background-color .2s;
+}
+.topbar nav a:hover { color: var(--ink); background: rgba(255, 255, 255, .04); }
+@media (max-width: 52rem) { .topbar nav { display: none; } }
+
+/* Hero */
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  gap: 2.5rem 3.5rem;
+  align-items: center;
+  padding-block: 3.5rem 2rem;
+}
+@media (max-width: 60rem) { .hero { grid-template-columns: minmax(0, 1fr); padding-block: 2.25rem 1rem; } }
+.hero-text { display: grid; gap: 1.4rem; min-width: 0; }
+h1 {
+  font-size: clamp(2.3rem, 1.3rem + 3.9vw, 4.1rem);
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: .015em;
+  text-transform: uppercase;
+}
+h1 span { display: block; color: var(--mars); }
+.lede { color: var(--muted); font-size: 1.0625rem; max-width: 50ch; }
+.readout { padding: 1.15rem 1.3rem 1.25rem; display: grid; gap: .3rem; max-width: 31rem; }
+.hud-label {
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+  font: 500 .75rem/1.2 var(--font-mono);
+  letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--muted);
 }
-.now-date { font: 600 clamp(1.25rem, 1rem + 1.5vw, 1.5rem)/1.15 var(--font-display); }
-.now-clock {
-  font: 500 var(--step-3)/1 var(--font-mono);
+.blink {
+  width: .5rem;
+  height: .5rem;
+  border-radius: 50%;
+  background: var(--mars);
+  box-shadow: 0 0 10px var(--mars);
+  animation: blink 2s ease-in-out infinite;
+}
+.ro-date { font: 600 clamp(1.45rem, 1.15rem + 1.3vw, 1.95rem)/1.15 var(--font-display); margin-top: .35rem; }
+.ro-clock {
+  font: 500 clamp(1.9rem, 1.35rem + 2.4vw, 2.75rem)/1.05 var(--font-mono);
   font-variant-numeric: tabular-nums;
-  color: var(--rust);
-  letter-spacing: .02em;
+  color: var(--mars);
+  letter-spacing: .01em;
+  text-shadow: 0 0 22px rgba(226, 104, 60, .35);
 }
-.now-clock small { font-size: .45em; color: var(--muted); letter-spacing: .04em; margin-left: .35rem; }
-.now-meta, .now-note { font-size: var(--step--1); color: var(--muted); }
-
-/* Converter consoles */
-main { padding-block: 2rem 3rem; display: grid; grid-template-columns: minmax(0, 1fr); gap: 3rem; }
-main > * { min-width: 0; }
-.consoles {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr));
-  gap: 1.25rem;
-  align-items: start;
+.ro-clock small {
+  font-size: .3em;
+  color: var(--dim);
+  margin-left: .6rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  text-shadow: none;
+  vertical-align: .35em;
 }
-.console {
-  min-width: 0;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 1.25rem;
-  display: grid;
-  gap: 1.1rem;
-  transition: border-color .2s;
-}
-.console.is-active { border-color: color-mix(in oklab, var(--rust) 55%, var(--line)); }
-.console-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .6rem 1rem; }
-h2 { font: 600 var(--step-1)/1.2 var(--font-display); margin: 0; text-wrap: balance; }
-.chips { display: flex; flex-wrap: wrap; gap: .4rem; }
-.chip {
-  font: 500 var(--step--1)/1 var(--font-body);
-  padding: .5rem .8rem;
-  border-radius: 999px;
-  border: 1px solid var(--line);
-  background: var(--bg);
-  color: var(--ink);
+.ro-meta { display: flex; flex-wrap: wrap; gap: .5rem 1.6rem; margin: .5rem 0 0; }
+.ro-meta div { display: grid; gap: .15rem; }
+.ro-meta dt { font: 500 .75rem/1.2 var(--font-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--dim); }
+.ro-meta dd { margin: 0; font: 500 .9375rem/1.3 var(--font-mono); font-variant-numeric: tabular-nums; }
+.ro-note { font-size: .8125rem; color: var(--muted); border-top: 1px dashed var(--line-2); padding-top: .6rem; margin-top: .45rem; }
+.cta { display: flex; flex-wrap: wrap; gap: .75rem; }
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .55rem;
+  min-height: 48px;
+  padding: .75rem 1.25rem;
+  border-radius: 3px;
+  font: 600 .875rem/1 var(--font-display);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  text-decoration: none;
   cursor: pointer;
+  transition: background-color .2s, color .2s, border-color .2s;
 }
-.chip:hover { border-color: var(--sky); color: var(--sky); }
+.btn-primary { background: var(--mars); color: var(--on-accent); border: 1px solid var(--mars); }
+.btn-primary:hover { background: var(--mars-hi); border-color: var(--mars-hi); }
+.btn-ghost { background: transparent; color: var(--ink); border: 1px solid var(--line-2); }
+.btn-ghost:hover { border-color: var(--dust); color: var(--dust); }
+
+/* Orbital dial */
+.dial-fig { margin: 0; display: grid; gap: 1rem; justify-items: center; min-width: 0; }
+#dial { display: block; width: 100%; max-width: 35rem; height: auto; overflow: visible; }
+.dial-orbit { fill: none; stroke: var(--line-2); stroke-width: 1.2; }
+.dial-orbit-draw {
+  fill: none;
+  stroke: rgba(233, 178, 124, .6);
+  stroke-width: 1.3;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: draw 1.8s .25s ease-out forwards;
+}
+.dial-spoke { stroke: var(--line); stroke-width: 1; stroke-dasharray: 2 4; }
+.dial-band { opacity: .3; transition: opacity .25s; }
+.dial-band.is-sel { opacity: .75; }
+.dial-month { font: 500 13px var(--font-body); fill: var(--ink); letter-spacing: .02em; }
+.dial-evtick { stroke: var(--dust); stroke-width: 1.5; }
+.dial-ev { font: 600 12px var(--font-mono); fill: var(--dust); }
+.sel-ring { fill: none; stroke: var(--mars); stroke-width: 2.2; }
+.sel-spoke { stroke: var(--mars); stroke-width: 1.3; stroke-dasharray: 3 3; }
+.mars-pulse {
+  fill: none;
+  stroke: var(--ice);
+  stroke-width: 1.2;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: pulse 2.8s ease-out infinite;
+}
+.dial-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: .45rem 1.2rem;
+  font-size: .8125rem;
+  color: var(--muted);
+  max-width: 36rem;
+}
+.dial-legend span { display: inline-flex; align-items: center; gap: .45rem; }
+
+/* Sections */
+.section { padding-block: 3.5rem; }
+.sec-head { display: grid; gap: .6rem; margin-bottom: 1.75rem; max-width: 64ch; }
+h2 { font-size: clamp(1.65rem, 1.2rem + 1.7vw, 2.5rem); line-height: 1.08; letter-spacing: .02em; text-transform: uppercase; }
+.sec-sub { color: var(--muted); }
+
+/* Converter console */
+.tabs { display: flex; border-bottom: 1px solid var(--line); }
+.tab {
+  flex: 1 1 0;
+  min-height: 56px;
+  padding: .85rem 1rem;
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  color: var(--muted);
+  font: 600 .9375rem/1.2 var(--font-display);
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color .2s, border-color .2s, background-color .2s;
+}
+.tab:hover { color: var(--ink); background: rgba(255, 255, 255, .025); }
+.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--mars); background: rgba(226, 104, 60, .07); }
+.tabpanel { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); }
+@media (max-width: 56rem) { .tabpanel { grid-template-columns: minmax(0, 1fr); } }
 .fields {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 8.5rem), 1fr));
-  gap: .75rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr));
+  gap: 1rem;
+  padding: 1.5rem;
+  align-content: start;
   margin: 0;
 }
-.field { display: grid; gap: .3rem; min-width: 0; align-content: start; }
-.field > span { font-size: var(--step--1); color: var(--muted); font-weight: 500; }
-.field em { font-style: normal; opacity: .75; }
-.field.wide { grid-column: 1 / -1; }
+.field { display: grid; gap: .4rem; min-width: 0; align-content: start; }
+.field > span { font: 500 .75rem/1.25 var(--font-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.field em { font-style: normal; text-transform: none; letter-spacing: 0; color: var(--dim); }
+.field.wide, .chips.wide { grid-column: 1 / -1; }
 input, select {
-  font: 500 1rem/1.25 var(--font-mono);
-  color: var(--ink);
-  background: var(--bg);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: .6rem .7rem;
   width: 100%;
   min-width: 0;
+  min-height: 48px;
+  padding: .7rem .8rem;
+  font: 500 1rem/1.25 var(--font-mono);
+  color: var(--ink);
+  background: var(--well);
+  border: 1px solid var(--line-2);
+  border-radius: 3px;
+  transition: border-color .2s, box-shadow .2s;
 }
-select, #mText { font-family: var(--font-body); }
+input:hover, select:hover { border-color: #4A5878; }
+input:focus-visible, select:focus-visible { outline: none; border-color: var(--ice); box-shadow: 0 0 0 3px rgba(142, 197, 232, .28); }
+select, #mText, input[type="date"], input[type="time"] { font-family: var(--font-body); font-variant-numeric: tabular-nums; }
+#mText { font-size: 1.125rem; }
+input[aria-invalid="true"] { border-color: var(--mars); }
 input::-webkit-date-and-time-value { text-align: left; }
 @supports (-webkit-touch-callout: none) {
   /* iOS Safari sizes native date/time fields on its own and can push them past the column */
-  input[type="date"], input[type="time"] { -webkit-appearance: none; min-height: 2.75rem; }
+  input[type="date"], input[type="time"] { -webkit-appearance: none; }
 }
-#mText { font-size: 1.0625rem; font-weight: 500; }
-input[aria-invalid="true"] { border-color: var(--rust); }
-.result { border-top: 1px dashed var(--line); padding-top: 1.1rem; display: grid; gap: .65rem; min-width: 0; }
-.big { font: 600 clamp(1.45rem, 1.1rem + 1.5vw, 2.05rem)/1.15 var(--font-display); text-wrap: balance; }
-.reading { color: var(--muted); }
-.facts {
+.chips { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+.chips .lbl { font-size: .8125rem; color: var(--dim); margin-right: .15rem; }
+.chip {
+  min-height: 44px;
+  padding: .55rem .95rem;
+  border-radius: 999px;
+  border: 1px solid var(--line-2);
+  background: transparent;
+  color: var(--ink);
+  font: 500 .875rem/1 var(--font-body);
+  cursor: pointer;
+  transition: border-color .2s, color .2s;
+}
+.chip:hover { border-color: var(--dust); color: var(--dust); }
+.result {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 10.5rem), 1fr));
-  gap: .7rem 1.25rem;
-  margin: .2rem 0 0;
+  gap: .55rem;
+  align-content: start;
+  min-width: 0;
+  padding: 1.5rem;
+  border-left: 1px solid var(--line);
+  background: rgba(5, 6, 10, .45);
 }
-.facts > div { min-width: 0; }
-.facts .span2 { grid-column: 1 / -1; }
-.facts .hl dd { color: var(--rust); font-weight: 600; }
-dt { font-size: var(--step--1); color: var(--muted); }
-dd { margin: 0; font-variant-numeric: tabular-nums; }
-.note {
-  font-size: .9375rem;
-  padding: .7rem .85rem;
-  border-radius: 8px;
-  background: color-mix(in oklab, var(--summer) 13%, var(--surface));
-  border: 1px solid color-mix(in oklab, var(--summer) 38%, var(--line));
+@media (max-width: 56rem) { .result { border-left: 0; border-top: 1px solid var(--line); } }
+.res-label { font: 500 .75rem/1.2 var(--font-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--dim); }
+.res-big { font: 700 clamp(1.75rem, 1.25rem + 2vw, 2.6rem)/1.1 var(--font-display); color: var(--dust); text-wrap: balance; }
+.res-sub { color: var(--muted); }
+.tag {
+  display: inline-block;
+  margin-left: .5rem;
+  padding: .15rem .55rem;
+  border: 1px solid var(--line-2);
+  border-radius: 999px;
+  font-size: .75rem;
+  color: var(--muted);
+  vertical-align: .1em;
 }
-.error { color: var(--rust); font-weight: 500; }
+.telemetry {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: .75rem 0 0;
+  border-top: 1px solid var(--line);
+}
+.telemetry > div { min-width: 0; padding: .75rem 1rem .75rem 0; border-bottom: 1px solid var(--line); }
+.telemetry .full { grid-column: 1 / -1; }
+.telemetry dt { font: 500 .75rem/1.25 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--dim); margin-bottom: .3rem; }
+.telemetry dd { margin: 0; font-size: .9375rem; line-height: 1.45; font-variant-numeric: tabular-nums; }
+.telemetry .utc { display: block; color: var(--dim); font-size: .8125rem; }
+.telemetry .hl dd { color: var(--mars); font-weight: 500; }
+.error { color: var(--mars); font-weight: 500; }
 
-/* Sections */
-.sec-head { display: grid; gap: .4rem; margin-bottom: 1.1rem; }
-.sec-sub { color: var(--muted); max-width: 68ch; }
-
-/* Year ribbon */
-.scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-.ribbon-wrap {
-  --rib-top: 2rem;
-  --rib-h: 3.5rem;
-  position: relative;
-  min-width: 18rem;
-  height: calc(var(--rib-top) + var(--rib-h) + 4.4rem);
-}
-.ribbon {
-  position: absolute;
-  top: var(--rib-top);
-  left: 0;
-  right: 0;
-  height: var(--rib-h);
-  display: flex;
-  border-radius: 8px;
-  overflow: hidden;
+/* Month grid */
+.months {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--line);
   border: 1px solid var(--line);
 }
-.seg {
-  container-type: inline-size;
+@media (max-width: 64rem) { .months { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 44rem) { .months { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.month {
   min-width: 0;
+  display: grid;
+  gap: .4rem;
+  align-content: start;
+  padding: 1.05rem 1.05rem 1.2rem;
+  background: rgba(11, 14, 20, .94);
+  transition: background-color .25s, box-shadow .25s;
+}
+.month.is-now { box-shadow: inset 0 0 0 1px rgba(142, 197, 232, .55); }
+.month.is-sel { background: linear-gradient(180deg, rgba(226, 104, 60, .13), rgba(11, 14, 20, .94) 70%); box-shadow: inset 0 0 0 1px rgba(226, 104, 60, .65); }
+.m-top { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
+.m-num { font: 500 .75rem/1 var(--font-mono); letter-spacing: .1em; color: var(--dim); }
+.m-season { display: inline-flex; align-items: center; gap: .4rem; font-size: .75rem; color: var(--muted); }
+.m-season::before { content: ""; width: .5rem; height: .5rem; border-radius: 50%; background: var(--c); }
+.m-name { font-size: 1.25rem; line-height: 1.15; letter-spacing: .04em; text-transform: uppercase; }
+.m-sols { font: 500 .8125rem/1.4 var(--font-mono); color: var(--muted); }
+.m-sols b { color: var(--ink); font-weight: 600; font-size: 1rem; }
+.m-note { font-size: .8125rem; line-height: 1.45; color: var(--muted); }
+.m-badges { display: flex; flex-wrap: wrap; gap: .3rem; }
+.m-badges:empty { display: none; }
+.badge { padding: .3rem .5rem; border-radius: 2px; font: 600 .75rem/1 var(--font-mono); letter-spacing: .06em; text-transform: uppercase; }
+.badge.now { background: rgba(142, 197, 232, .14); color: var(--ice); }
+.badge.sel { background: rgba(226, 104, 60, .17); color: var(--mars); }
+
+/* Method slider */
+.slider-bar {
   display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding-inline: .45rem;
-  border-left: 1px solid var(--surface);
-  background: color-mix(in oklab, var(--c) 24%, var(--surface));
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: .85rem 1rem .85rem 1.4rem;
+  border-bottom: 1px solid var(--line);
+}
+.step-count { font: 500 .8125rem/1.2 var(--font-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.step-count b { color: var(--ink); font-weight: 600; }
+.slider-nav { display: flex; gap: .5rem; }
+.nav-btn {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line-2);
+  border-radius: 3px;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  transition: border-color .2s, color .2s, opacity .2s;
+}
+.nav-btn:hover:not(:disabled) { border-color: var(--dust); color: var(--dust); }
+.nav-btn:disabled { opacity: .35; cursor: default; }
+.slides {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 100%;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+.slides::-webkit-scrollbar { display: none; }
+.slide {
+  scroll-snap-align: start;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 1.5rem 3rem;
+  align-items: center;
+  padding: 2rem 1.75rem 1.75rem;
+}
+@media (max-width: 52rem) { .slide { grid-template-columns: minmax(0, 1fr); padding: 1.5rem 1.15rem 1.25rem; } }
+.slide-num { font: 700 3.25rem/1 var(--font-display); color: transparent; -webkit-text-stroke: 1px var(--line-2); }
+.slide h3 { font-size: 1.35rem; line-height: 1.2; letter-spacing: .04em; text-transform: uppercase; margin: .7rem 0 .65rem; }
+.slide p { color: var(--muted); max-width: 52ch; }
+.formula {
+  min-width: 0;
+  display: grid;
+  gap: .55rem;
+  padding: 1.15rem 1.25rem;
+  background: var(--well);
+  border: 1px solid var(--line);
+  font: 500 .9375rem/1.5 var(--font-mono);
+  overflow-wrap: anywhere;
+}
+.f-in { color: var(--muted); }
+.f-arrow { color: var(--dim); }
+.f-out { color: var(--dust); font-size: 1.125rem; font-weight: 600; }
+.dots { display: flex; justify-content: center; gap: .1rem; padding: 0 0 .75rem; }
+.dot { width: 44px; height: 44px; display: grid; place-items: center; background: transparent; border: 0; cursor: pointer; }
+.dot::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--line-2); transition: background-color .2s, transform .2s; }
+.dot:hover::before { background: var(--dust); }
+.dot[aria-current="step"]::before { background: var(--mars); transform: scale(1.35); }
+
+/* Martian time */
+.time-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 2rem 3.5rem; align-items: center; }
+@media (max-width: 52rem) { .time-grid { grid-template-columns: minmax(0, 1fr); } }
+.time-grid .sec-head { margin-bottom: 0; }
+.dur { padding: 1.5rem; display: grid; gap: 1.1rem; }
+.dur-row { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: .75rem; align-items: end; }
+.dur-row .eq { font: 500 1.25rem/48px var(--font-mono); color: var(--dim); }
+.dur-facts { list-style: none; margin: 0; padding: .9rem 0 0; border-top: 1px solid var(--line); display: grid; gap: .45rem; font: 500 .8125rem/1.45 var(--font-mono); color: var(--muted); }
+.dur-facts b { color: var(--ink); font-weight: 500; }
+
+/* Notes */
+.notes { border-top: 1px solid var(--line); }
+.notes details { border-bottom: 1px solid var(--line); }
+.notes summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 56px;
+  padding: .9rem 0;
+  font-size: 1.0625rem;
+  font-weight: 500;
+  transition: color .2s;
+}
+.notes summary:hover { color: var(--dust); }
+.notes summary::-webkit-details-marker { display: none; }
+.notes summary::after { content: "+"; flex: none; font: 400 1.5rem/1 var(--font-mono); color: var(--dust); transition: transform .2s; }
+.notes details[open] summary::after { transform: rotate(45deg); }
+.note-body {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr));
+  gap: .65rem 3rem;
+  padding: 0 0 1.3rem;
+  color: var(--muted);
+}
+.note-body p { max-width: 70ch; }
+
+footer { border-top: 1px solid var(--line); margin-top: 1.5rem; }
+footer .wrap {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: .75rem 2rem;
+  padding-block: 1.5rem 2.5rem;
   font-size: .8125rem;
-  line-height: 1.25;
-  white-space: nowrap;
-  overflow: hidden;
-  transition: background-color .2s;
-}
-.seg:first-child { border-left: 0; }
-.seg b { font-weight: 600; }
-.seg .abbr { display: none; }
-.seg small { color: var(--muted); font-family: var(--font-mono); font-size: .75rem; }
-@container (max-width: 4.4rem) {
-  .seg .full { display: none; }
-  .seg .abbr { display: inline; }
-}
-.seg.is-current { background: color-mix(in oklab, var(--c) 52%, var(--surface)); }
-.ev {
-  position: absolute;
-  top: calc(var(--rib-top) + var(--rib-h) + .05rem);
-  transform: translateX(-50%);
-  font: 500 .6875rem/1 var(--font-mono);
-  color: var(--muted);
-  text-align: center;
-}
-.ev::before { content: ""; display: block; width: 1px; height: .4rem; margin: 0 auto .2rem; background: var(--muted); }
-.ev.start { transform: none; text-align: left; }
-.ev.start::before { margin-left: 0; }
-.storm {
-  position: absolute;
-  top: calc(var(--rib-top) + var(--rib-h) + 1.45rem);
-  height: 1.15rem;
-  border-radius: 4px;
-  background: repeating-linear-gradient(135deg, color-mix(in oklab, var(--dust) 50%, transparent) 0 5px, transparent 5px 9px);
-  font: 500 .6875rem/1.15rem var(--font-body);
-  color: var(--muted);
-  padding-inline: .45rem;
-  white-space: nowrap;
-  overflow: hidden;
-}
-.marker { position: absolute; top: 0; bottom: 0; width: 0; pointer-events: none; transition: left .35s ease; }
-.marker::before { content: ""; position: absolute; left: -1px; width: 2px; background: var(--mk); }
-.marker.mk-sel { --mk: var(--rust); }
-.marker.mk-sel::before { top: 1.45rem; height: calc(var(--rib-top) + var(--rib-h) - 1.45rem); }
-.marker.mk-now { --mk: var(--sky); }
-.marker.mk-now::before { top: var(--rib-top); height: calc(var(--rib-h) + 3.1rem); opacity: .8; }
-.tag {
-  position: absolute;
-  transform: translateX(-50%);
-  font: 600 .75rem/1 var(--font-body);
-  white-space: nowrap;
-  padding: .25rem .45rem;
-  border-radius: 4px;
-  background: var(--mk);
-  color: var(--on-accent);
-}
-.marker.mk-sel .tag { top: 0; }
-.marker.mk-now .tag { top: calc(var(--rib-top) + var(--rib-h) + 3.1rem); }
-.marker.start .tag { transform: translateX(-2px); }
-.marker.end .tag { transform: translateX(calc(-100% + 2px)); }
-.legend { display: flex; flex-wrap: wrap; gap: .4rem 1.25rem; margin: .9rem 0 0; padding: 0; list-style: none; font-size: var(--step--1); color: var(--muted); }
-.legend li { display: inline-flex; align-items: center; gap: .4rem; }
-.dot { display: inline-block; width: .65rem; height: .65rem; border-radius: 50%; background: var(--c); flex: none; }
-.hatch {
-  display: inline-block;
-  width: 1.1rem;
-  height: .65rem;
-  border-radius: 2px;
-  background: repeating-linear-gradient(135deg, color-mix(in oklab, var(--dust) 65%, transparent) 0 3px, transparent 3px 5px);
+  color: var(--dim);
 }
 
-/* Month table */
-.table-card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; min-width: 38rem; }
-th, td { text-align: left; padding: .6rem .85rem; border-bottom: 1px solid var(--line); vertical-align: top; }
-tbody tr:last-child td { border-bottom: 0; }
-th { font-size: var(--step--1); color: var(--muted); font-weight: 600; background: var(--sunken); }
-th.num, td.num { text-align: right; font-family: var(--font-mono); }
-td .dot { margin-right: .45rem; vertical-align: .05rem; }
-tr.is-current td { background: color-mix(in oklab, var(--rust) 10%, var(--surface)); }
-td.notes { color: var(--muted); }
-.m-dot, .m-note { display: none; }
-.m-note { margin-top: .15rem; font-size: var(--step--1); color: var(--muted); }
-
-/* Phones: month names run vertically so the whole year fits on screen; table notes move under the month name */
-@media (max-width: 40rem) {
-  .console { padding: 1rem; }
-  .ribbon-wrap { --rib-h: 6rem; }
-  .seg {
-    writing-mode: vertical-rl;
-    transform: rotate(180deg);
-    align-items: center;
-    padding: .4rem 0;
-    font-size: .75rem;
-    border-left: 0;
-    border-right: 1px solid var(--surface);
-  }
-  .seg:first-child { border-right: 0; }
-  .seg small { display: none; }
-  .storm { color: transparent; }
-  table { min-width: 0; font-size: .9375rem; }
-  th, td { padding: .5rem .55rem; }
-  .col-season, .col-notes { display: none; }
-  .m-dot { display: inline-block; }
-  .m-note { display: block; }
-}
-
-/* Method */
-.method { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 1.5rem 2.5rem; align-items: start; }
-@media (max-width: 54rem) { .method { grid-template-columns: minmax(0, 1fr); } }
-.steps { margin: 0; padding-left: 1.4rem; display: grid; gap: .7rem; max-width: 66ch; }
-.steps li::marker { font-family: var(--font-mono); color: var(--rust); }
-.aside { display: grid; gap: 1rem; min-width: 0; }
-.aside h3 { font: 600 var(--step-0)/1.3 var(--font-body); margin: 0 0 .3rem; }
-.aside p { max-width: 62ch; }
-.dur { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 1rem 1.1rem; display: grid; gap: .75rem; }
-.dur-row { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: .6rem; align-items: end; }
-.dur-row .eq { font: 500 1.25rem/2.6rem var(--font-mono); color: var(--muted); }
-.dur .hint { font-size: var(--step--1); color: var(--muted); }
-
-footer { border-top: 1px solid var(--line); }
-footer .wrap { padding-block: 1.25rem 2rem; font-size: var(--step--1); color: var(--muted); display: grid; gap: .35rem; }
+/* Only decorative layers move; all content is visible from the first frame */
+@keyframes draw { to { stroke-dashoffset: 0; } }
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: .3; } }
+@keyframes pulse { from { opacity: .85; transform: scale(.55); } to { opacity: 0; transform: scale(1.7); } }
 
 @media (prefers-reduced-motion: reduce) {
-  .marker, .seg, .console { transition: none; }
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .dial-orbit-draw { stroke-dashoffset: 0; }
 }
 </style>
 <script type="application/ld+json">
@@ -396,133 +564,253 @@ footer .wrap { padding-block: 1.25rem 2rem; font-size: var(--step--1); color: va
 </script>
 </head>
 <body>
-<header class="band">
-  <div class="wrap head">
-    <div>
-      <p class="eyebrow">Нові Темні Віки · Колонія · додаток «Хронометрія»</p>
-      <h1>Хронометрія «Колонії»</h1>
-      <p class="lede">Переводить дати між земним календарем і марсіанським календарем роману Макса Кідрука. Рахує так само, як онлайн-конвертер LMD, на який посилається книга, а потім визначає місяць і рік за таблицею з додатка.</p>
-    </div>
-    <aside class="now" aria-label="Зараз на Марсі">
-      <p class="label">Зараз на Марсі</p>
-      <p class="now-date" id="nowDate">—</p>
-      <p class="now-clock" id="nowClock">--:--:--</p>
-      <p class="now-meta" id="nowMeta"></p>
-      <p class="now-note" id="nowNote" hidden></p>
-    </aside>
+<canvas id="stars" aria-hidden="true"></canvas>
+<div class="glow" aria-hidden="true"></div>
+
+<header class="topbar">
+  <div class="wrap topbar-in">
+    <a class="brand" href="#top">
+      <svg width="28" height="28" viewBox="0 0 32 32" aria-hidden="true">
+        <ellipse cx="16" cy="16" rx="12" ry="11" fill="none" stroke="#E9B27C" stroke-width="1.6" opacity=".7"/>
+        <circle cx="16" cy="16" r="3.2" fill="#FFC56B"/>
+        <circle cx="25.4" cy="10.5" r="3.6" fill="#E2683C"/>
+      </svg>
+      Хронометрія
+    </a>
+    <nav aria-label="Розділи сторінки">
+      <a href="#converter">Конвертер</a>
+      <a href="#calendar">Календар</a>
+      <a href="#method">Як рахується</a>
+      <a href="#time">Марсіанський час</a>
+      <a href="#notes">Примітки</a>
+    </nav>
   </div>
 </header>
 
-<main class="wrap">
-  <div class="consoles">
-    <section class="console is-active" id="e2mCard" aria-labelledby="e2mTitle">
-      <div class="console-head">
-        <h2 id="e2mTitle">Земля → Марс</h2>
-        <div class="chips">
-          <button type="button" class="chip" id="eNow">Зараз</button>
-          <button type="button" class="chip" id="eBook">Приклад з книги</button>
-        </div>
+<main id="top">
+  <section class="hero wrap" aria-labelledby="heroTitle">
+    <div class="hero-text">
+      <p class="eyebrow">Нові Темні Віки · Колонія · додаток «Хронометрія»</p>
+      <h1 id="heroTitle">Хронометрія <span>«Колонії»</span></h1>
+      <p class="lede">Конвертер дат із роману Макса Кідрука «Нові Темні Віки. Колонія». Введіть дату з книги, наприклад «Телець 17, 46», і дізнайтеся, коли це на Землі. Працює й навпаки.</p>
+      <div class="readout hud" role="group" aria-label="Зараз на Марсі">
+        <p class="hud-label"><span class="blink" aria-hidden="true"></span>Зараз на Марсі</p>
+        <p class="ro-date" id="nowDate">—</p>
+        <p class="ro-clock" id="nowClock">--:--:--</p>
+        <dl class="ro-meta">
+          <div><dt>Сол року</dt><dd id="nowSol">—</dd></div>
+          <div><dt>Ls</dt><dd id="nowLs">—</dd></div>
+          <div><dt>Пора року</dt><dd id="nowSeason">—</dd></div>
+        </dl>
+        <p class="ro-note" id="nowNote" hidden></p>
       </div>
-      <form class="fields" id="e2mForm" autocomplete="off">
-        <label class="field"><span>Земна дата</span><input type="date" id="eDate" value="2142-09-23" min="1583-01-01" max="9999-12-31"></label>
-        <label class="field"><span>Час</span><input type="time" id="eTime" value="12:00"></label>
-        <label class="field"><span>Часовий пояс</span>
-          <select id="eTz"><option value="utc">UTC</option><option value="local" id="eTzLocal">Мій час</option></select>
-        </label>
-      </form>
-      <div class="result" id="e2mResult" aria-live="polite"></div>
-    </section>
-
-    <section class="console" id="m2eCard" aria-labelledby="m2eTitle">
-      <div class="console-head">
-        <h2 id="m2eTitle">Марс → Земля</h2>
-        <div class="chips">
-          <button type="button" class="chip" id="mToday">Сьогодні</button>
-          <button type="button" class="chip" id="mBook">Телець 17, 46</button>
-        </div>
-      </div>
-      <form class="fields" id="m2eForm" autocomplete="off">
-        <label class="field wide"><span>Дата, як у книзі</span><input type="text" id="mText" value="Телець 17, 46" placeholder="Козеріг 21, 46" spellcheck="false"></label>
-        <label class="field"><span>Місяць</span><select id="mMonth"></select></label>
-        <label class="field"><span>Сол</span><input type="number" id="mDay" min="1" max="55" step="1" value="17"></label>
-        <label class="field"><span>Рік</span><input type="number" id="mYear" min="-250" max="4000" step="1" value="46"></label>
-        <label class="field"><span>Час на Марсі <em>(необов'язково)</em></span><input type="time" id="mTime"></label>
-      </form>
-      <div class="result" id="m2eResult" aria-live="polite"></div>
-    </section>
-  </div>
-
-  <section aria-labelledby="yearTitle">
-    <div class="sec-head">
-      <h2 id="yearTitle">Марсіанський рік: 668,6 сола</h2>
-      <p class="sec-sub">Ширина місяця пропорційна кількості солів. Колір показує пору року в північній півкулі. Червона позначка — дата з активного конвертера, синя — сьогодні.</p>
-    </div>
-    <div class="scroll">
-      <div class="ribbon-wrap" id="ribbonWrap">
-        <div class="ribbon" id="ribbon"></div>
-        <div class="marker mk-now" id="mkNow"><span class="tag">сьогодні</span></div>
-        <div class="marker mk-sel" id="mkSel"><span class="tag" id="mkSelTag"></span></div>
+      <div class="cta">
+        <a class="btn btn-primary" href="#converter" id="ctaConvert">Перевести дату з книги</a>
+        <a class="btn btn-ghost" href="#method">Як це рахується</a>
       </div>
     </div>
-    <ul class="legend" id="legend"></ul>
+    <figure class="dial-fig">
+      <svg id="dial" viewBox="-210 -210 420 420" role="img" aria-labelledby="dialTitle dialDesc">
+        <title id="dialTitle">Марсіанський рік на орбіті</title>
+        <desc id="dialDesc">Орбіта Марса навколо Сонця, поділена на дванадцять місяців календаря книги. Позначено, де Марс зараз і де обрана в конвертері дата.</desc>
+      </svg>
+      <figcaption class="dial-legend">
+        <span><svg width="16" height="16" viewBox="-8 -8 16 16" aria-hidden="true"><circle r="6" fill="#D2582A"/></svg>Марс сьогодні</span>
+        <span><svg width="16" height="16" viewBox="-8 -8 16 16" aria-hidden="true"><circle r="6" fill="none" stroke="#E2683C" stroke-width="2"/></svg>Обрана дата</span>
+        <span><svg width="20" height="10" viewBox="0 0 20 10" aria-hidden="true"><rect width="20" height="10" fill="url(#hatchLegend)"/><defs><pattern id="hatchLegend" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="2" height="5" fill="#E9B27C"/></pattern></defs></svg>Пилові бурі</span>
+        <span>ВР, ОР рівнодення · ЛС, ЗС сонцестояння · А афелій · П перигелій</span>
+      </figcaption>
+    </figure>
   </section>
 
-  <section aria-labelledby="tableTitle">
+  <section class="section wrap" id="converter" aria-labelledby="convTitle">
     <div class="sec-head">
-      <h2 id="tableTitle">Таблиця місяців</h2>
-      <p class="sec-sub">Таблиця 1 з додатка. Номери солів ідуть від 1 до 669: так їх рахує конвертер LMD, і 669-й сол — це Телець 56, «новорічний вечір».</p>
+      <p class="eyebrow">Конвертер</p>
+      <h2 id="convTitle">Перевести дату</h2>
     </div>
-    <div class="table-card">
-      <table>
-        <thead>
-          <tr><th class="num">№</th><th>Місяць</th><th class="num">Солів</th><th class="num">Перший сол</th><th class="col-season">Пора року</th><th class="col-notes">Примітки</th></tr>
-        </thead>
-        <tbody id="monthRows"></tbody>
-      </table>
+    <div class="console hud">
+      <div class="tabs" role="tablist" aria-label="Напрямок перерахунку">
+        <button type="button" role="tab" class="tab" id="tab-m2e" aria-selected="true" aria-controls="panel-m2e">Марс → Земля</button>
+        <button type="button" role="tab" class="tab" id="tab-e2m" aria-selected="false" aria-controls="panel-e2m" tabindex="-1">Земля → Марс</button>
+      </div>
+
+      <div class="tabpanel" role="tabpanel" id="panel-m2e" aria-labelledby="tab-m2e">
+        <form class="fields" id="m2eForm" autocomplete="off">
+          <label class="field wide"><span>Дата, як у книзі</span><input type="text" id="mText" value="Телець 17, 46" placeholder="Козеріг 21, 46" spellcheck="false"></label>
+          <label class="field"><span>Місяць</span><select id="mMonth"></select></label>
+          <label class="field"><span>Сол</span><input type="number" id="mDay" min="1" max="56" step="1" value="17"></label>
+          <label class="field"><span>Рік</span><input type="number" id="mYear" min="-250" max="4000" step="1" value="46"></label>
+          <label class="field"><span>Час на Марсі <em>(необов'язково)</em></span><input type="time" id="mTime"></label>
+          <div class="chips wide"><span class="lbl">Швидко:</span><button type="button" class="chip" id="mBook">Телець 17, 46</button><button type="button" class="chip" id="mToday">Сьогодні</button></div>
+        </form>
+        <div class="result" id="m2eResult" aria-live="polite"></div>
+      </div>
+
+      <div class="tabpanel" role="tabpanel" id="panel-e2m" aria-labelledby="tab-e2m" hidden>
+        <form class="fields" id="e2mForm" autocomplete="off">
+          <label class="field"><span>Земна дата</span><input type="date" id="eDate" value="2142-09-23" min="1583-01-01" max="9999-12-31"></label>
+          <label class="field"><span>Час</span><input type="time" id="eTime" value="12:00"></label>
+          <label class="field wide"><span>Часовий пояс</span><select id="eTz"><option value="utc">UTC</option><option value="local" id="eTzLocal">Мій час</option></select></label>
+          <div class="chips wide"><span class="lbl">Швидко:</span><button type="button" class="chip" id="eBook">23.09.2142, приклад з книги</button><button type="button" class="chip" id="eNow">Зараз</button></div>
+        </form>
+        <div class="result" id="e2mResult" aria-live="polite"></div>
+      </div>
     </div>
   </section>
 
-  <section aria-labelledby="methodTitle">
+  <section class="section wrap" id="calendar" aria-labelledby="calTitle">
     <div class="sec-head">
-      <h2 id="methodTitle">Як рахується</h2>
-      <p class="sec-sub">Розрахунок повторює код сторінки martian_time.html з сайту Mars Climate Database (LMD), взятий з архівної копії, і алгоритм з додатка до роману.</p>
+      <p class="eyebrow">Календар</p>
+      <h2 id="calTitle">Дванадцять місяців марсіанського року</h2>
+      <p class="sec-sub">Рік починається з весняного рівнодення в північній півкулі. Місяці названо за сузір'ями, крізь які проходить Марс, якщо дивитися із Сонця. Біля перигелію Марс рухається швидше, тому зимові місяці коротші за літні.</p>
     </div>
-    <div class="method">
-      <ol class="steps">
-        <li><b>Земна дата стає юліанською.</b> Дата й час беруться в UTC. Для 23 вересня 2142, 12:00 UTC це JD 2 503 675, як на рис. 3 у книзі.</li>
-        <li><b>Юліанська дата стає солами.</b> Відлік іде від 19 грудня 1975, 04:00 UTC: тоді Ls = 0 і почався 12-й марсіанський рік за Кленсі. Один сол триває 88 775,245 с.</li>
-        <li><b>Соли діляться на роки по 668,6 сола.</b> Ціла частина дає рік за Кленсі, залишок дає номер сола від 1 до 669. Останній, 669-й сол коротший за інші: 0,6 сола.</li>
-        <li><b>Номер сола дає місяць і день.</b> День = номер сола − перший сол місяця + 1. Наприклад, 443-й сол: 443 − 422 + 1 = Козеріг 22.</li>
-        <li><b>Від року за Кленсі віднімається 54.</b> Виходить рік «Нових Темних Віків». За цими правилами рік 1 почався 3 листопада 2056 і тривав до 21 вересня 2058, тобто охопив 2057-й, рік висадки.</li>
-      </ol>
-      <div class="aside">
-        <div>
-          <h3>Розбіжність із прикладом у книзі</h3>
-          <p>На с. 908 для 23 вересня 2142 вказано «Козеріг 21, 46». Конвертер LMD для цієї дати дає Sol number 443. За таблицею 422-й сол уже є Козерогом 1, тож 443-й сол — це Козеріг 22. У книзі від 443 відняли 422 і не додали одиницю. Тут розрахунок іде за таблицею, бо вона узгоджена з LMD: 669-й сол там якраз Телець 56.</p>
+    <ol class="months" id="months">
+      <li class="month" data-i="0" style="--c: var(--spring)"><div class="m-top"><span class="m-num">01</span><span class="m-season">весна</span></div><h3 class="m-name">Близнюки</h3><p class="m-sols"><b>61</b> сол · соли 1–61</p><p class="m-note">Близнюки 1: весняне рівнодення, Новий рік</p><div class="m-badges"></div></li>
+      <li class="month" data-i="1" style="--c: var(--spring)"><div class="m-top"><span class="m-num">02</span><span class="m-season">весна</span></div><h3 class="m-name">Рак</h3><p class="m-sols"><b>65</b> солів · соли 62–126</p><div class="m-badges"></div></li>
+      <li class="month" data-i="2" style="--c: var(--summer)"><div class="m-top"><span class="m-num">03</span><span class="m-season">літо</span></div><h3 class="m-name">Лев</h3><p class="m-sols"><b>66</b> солів · соли 127–192</p><p class="m-note">Лев 24: Марс в афелії, найдалі від Сонця</p><div class="m-badges"></div></li>
+      <li class="month" data-i="3" style="--c: var(--summer)"><div class="m-top"><span class="m-num">04</span><span class="m-season">літо</span></div><h3 class="m-name">Діва</h3><p class="m-sols"><b>65</b> солів · соли 193–257</p><p class="m-note">Діва 1: літнє сонцестояння</p><div class="m-badges"></div></li>
+      <li class="month" data-i="4" style="--c: var(--summer)"><div class="m-top"><span class="m-num">05</span><span class="m-season">літо</span></div><h3 class="m-name">Терези</h3><p class="m-sols"><b>60</b> солів · соли 258–317</p><div class="m-badges"></div></li>
+      <li class="month" data-i="5" style="--c: var(--autumn)"><div class="m-top"><span class="m-num">06</span><span class="m-season">осінь</span></div><h3 class="m-name">Скорпіон</h3><p class="m-sols"><b>54</b> соли · соли 318–371</p><div class="m-badges"></div></li>
+      <li class="month" data-i="6" style="--c: var(--autumn)"><div class="m-top"><span class="m-num">07</span><span class="m-season">осінь</span></div><h3 class="m-name">Стрілець</h3><p class="m-sols"><b>50</b> солів · соли 372–421</p><p class="m-note">Стрілець 1: осіннє рівнодення</p><div class="m-badges"></div></li>
+      <li class="month" data-i="7" style="--c: var(--autumn)"><div class="m-top"><span class="m-num">08</span><span class="m-season">осінь</span></div><h3 class="m-name">Козеріг</h3><p class="m-sols"><b>47</b> солів · соли 422–468</p><p class="m-note">Починається сезон пилових бур</p><div class="m-badges"></div></li>
+      <li class="month" data-i="8" style="--c: var(--winter)"><div class="m-top"><span class="m-num">09</span><span class="m-season">зима</span></div><h3 class="m-name">Водолій</h3><p class="m-sols"><b>46</b> солів · соли 469–514</p><p class="m-note">Водолій 16: Марс у перигелії, найближче до Сонця</p><div class="m-badges"></div></li>
+      <li class="month" data-i="9" style="--c: var(--winter)"><div class="m-top"><span class="m-num">10</span><span class="m-season">зима</span></div><h3 class="m-name">Риби</h3><p class="m-sols"><b>48</b> солів · соли 515–562</p><p class="m-note">Риби 1: зимове сонцестояння</p><div class="m-badges"></div></li>
+      <li class="month" data-i="10" style="--c: var(--winter)"><div class="m-top"><span class="m-num">11</span><span class="m-season">зима</span></div><h3 class="m-name">Овен</h3><p class="m-sols"><b>51</b> сол · соли 563–613</p><p class="m-note">Закінчується сезон пилових бур</p><div class="m-badges"></div></li>
+      <li class="month" data-i="11" style="--c: var(--spring)"><div class="m-top"><span class="m-num">12</span><span class="m-season">весна</span></div><h3 class="m-name">Телець</h3><p class="m-sols"><b>55 + 1</b> · соли 614–669</p><p class="m-note">Телець 56: новорічний вечір, коротший сол</p><div class="m-badges"></div></li>
+    </ol>
+  </section>
+
+  <section class="section wrap" id="method" aria-labelledby="methodTitle">
+    <div class="sec-head">
+      <p class="eyebrow">Як рахується</p>
+      <h2 id="methodTitle">П'ять кроків від Землі до Марса</h2>
+      <p class="sec-sub">Розрахунок повторює онлайн-конвертер Mars Climate Database, на який посилається книга. Приклад: 23 вересня 2142, 12:00 UTC.</p>
+    </div>
+    <div class="slider hud" aria-roledescription="карусель" aria-label="Як рахується">
+      <div class="slider-bar">
+        <p class="step-count" id="stepCount" aria-live="polite">Крок <b>1</b> / 5</p>
+        <div class="slider-nav">
+          <button type="button" class="nav-btn" id="prevStep" aria-label="Попередній крок"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+          <button type="button" class="nav-btn" id="nextStep" aria-label="Наступний крок"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
         </div>
-        <div>
-          <h3>Час доби</h3>
-          <p>У книзі MST — сонячний час на нульовому меридіані, що проходить через «Централдом» у Ньюборні. Довготи Ньюборна книга не дає. Тому марсіанський годинник тут рахує час від початку календарного сола: 00:00 — це мить, коли за правилами LMD змінюється дата. Марсіанська година дорівнює 1/24 сола.</p>
-        </div>
-        <div class="dur">
-          <h3>Тривалість: марсіанська ↔ земна</h3>
-          <div class="dur-row">
-            <label class="field"><span>На Марсі, год:хв:с</span><input type="text" id="dMars" value="1:00:00" spellcheck="false"></label>
-            <span class="eq" aria-hidden="true">=</span>
-            <label class="field"><span>На Землі, год:хв:с</span><input type="text" id="dEarth" value="1:01:39" spellcheck="false"></label>
+      </div>
+      <ol class="slides" id="slides" tabindex="0" aria-label="Кроки розрахунку">
+        <li class="slide" aria-roledescription="слайд" aria-label="Крок 1 з 5">
+          <div>
+            <p class="slide-num" aria-hidden="true">01</p>
+            <h3>Земна дата → юліанська дата</h3>
+            <p>Дата й час беруться у всесвітньому часі UTC і переводяться в юліанську дату. Це безперервний лік діб, яким користуються астрономи.</p>
           </div>
-          <p class="hint">За Зубріном марсіанська секунда в 1,0275 раза довша за земну. Сол = 24 марсіанські години = 24 год 39 хв 35 с земних.</p>
-        </div>
+          <div class="formula"><span class="f-in">23.09.2142, 12:00 UTC</span><span class="f-arrow" aria-hidden="true">↓</span><span class="f-out">JD 2 503 675</span></div>
+        </li>
+        <li class="slide" aria-roledescription="слайд" aria-label="Крок 2 з 5">
+          <div>
+            <p class="slide-num" aria-hidden="true">02</p>
+            <h3>Юліанська дата → соли</h3>
+            <p>Відлік іде від 19 грудня 1975, 04:00 UTC. Тоді почався 12-й марсіанський рік за нумерацією Кленсі. Один сол триває 88 775,245 секунди.</p>
+          </div>
+          <div class="formula"><span class="f-in">(2 503 675 − 2 442 765,667) × 86 400 ÷ 88 775,245</span><span class="f-arrow" aria-hidden="true">↓</span><span class="f-out">59 279,66 сола</span></div>
+        </li>
+        <li class="slide" aria-roledescription="слайд" aria-label="Крок 3 з 5">
+          <div>
+            <p class="slide-num" aria-hidden="true">03</p>
+            <h3>Соли → рік і номер сола</h3>
+            <p>Рік на Марсі триває 668,6 сола. Ціла кількість років дає номер року, залишок дає номер сола від 1 до 669. Останній, 669-й сол коротший за інші.</p>
+          </div>
+          <div class="formula"><span class="f-in">59 279,66 = 88 × 668,6 + 442,86</span><span class="f-arrow" aria-hidden="true">↓</span><span class="f-out">рік 12 + 88 = 100, сол № 443</span></div>
+        </li>
+        <li class="slide" aria-roledescription="слайд" aria-label="Крок 4 з 5">
+          <div>
+            <p class="slide-num" aria-hidden="true">04</p>
+            <h3>Номер сола → місяць і день</h3>
+            <p>Номер сола шукаємо в таблиці місяців. День місяця дорівнює номеру сола мінус перший сол місяця плюс один.</p>
+          </div>
+          <div class="formula"><span class="f-in">Козеріг: соли 422–468</span><span class="f-in">443 − 422 + 1 = 22</span><span class="f-arrow" aria-hidden="true">↓</span><span class="f-out">Козеріг 22</span></div>
+        </li>
+        <li class="slide" aria-roledescription="слайд" aria-label="Крок 5 з 5">
+          <div>
+            <p class="slide-num" aria-hidden="true">05</p>
+            <h3>Рік за Кленсі → рік книги</h3>
+            <p>Від року за Кленсі віднімаємо 54 і отримуємо рік «Нових Темних Віків». Перший рік почався 3 листопада 2056-го й охопив 2057-й, рік висадки.</p>
+          </div>
+          <div class="formula"><span class="f-in">100 − 54 = 46</span><span class="f-arrow" aria-hidden="true">↓</span><span class="f-out">Козеріг 22, 46</span></div>
+        </li>
+      </ol>
+      <div class="dots" id="dots"></div>
+    </div>
+  </section>
+
+  <section class="section wrap" id="time" aria-labelledby="timeTitle">
+    <div class="time-grid">
+      <div class="sec-head">
+        <p class="eyebrow">Марсіанський час</p>
+        <h2 id="timeTitle">Сол, година, секунда</h2>
+        <p class="sec-sub">Марсіанська доба, сол, триває 24 год 39 хв 35 с земного часу. У книзі, слідом за Робертом Зубріном, сол ділять на звичні 24 години по 60 хвилин, але кожна марсіанська секунда в 1,0275 раза довша за земну. На відчуття сол майже не відрізняється від земної доби.</p>
       </div>
+      <div class="dur hud">
+        <div class="dur-row">
+          <label class="field"><span>На Марсі</span><input type="text" id="dMars" value="1:00:00" spellcheck="false" aria-describedby="durHint"></label>
+          <span class="eq" aria-hidden="true">=</span>
+          <label class="field"><span>На Землі</span><input type="text" id="dEarth" value="1:01:39" spellcheck="false" aria-describedby="durHint"></label>
+        </div>
+        <ul class="dur-facts" id="durHint">
+          <li>Формат: <b>год:хв:с</b>, рахує в обидва боки</li>
+          <li>1 марсіанська секунда = <b>1,0275 с</b></li>
+          <li>1 марсіанська година = <b>1 год 1 хв 39 с</b></li>
+          <li>1 сол = <b>24 год 39 хв 35 с</b></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="section wrap" id="notes" aria-labelledby="notesTitle">
+    <div class="sec-head">
+      <p class="eyebrow">Примітки</p>
+      <h2 id="notesTitle">Деталі для допитливих</h2>
+    </div>
+    <div class="notes">
+      <details>
+        <summary>Чому для 23 вересня 2142 тут Козеріг 22, а в книзі Козеріг 21?</summary>
+        <div class="note-body">
+          <p>На с. 908 конвертер LMD дає для цієї дати Sol number 443. За таблицею місяців 422-й сол уже є Козерогом 1, тож 443-й сол — це Козеріг 22. У книзі від 443 відняли 422 й не додали одиницю.</p>
+          <p>Конвертер іде за таблицею, бо вона узгоджена з нумерацією LMD: 669-й сол там якраз Телець 56.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Що показує марсіанський годинник?</summary>
+        <div class="note-body">
+          <p>У книзі MST — сонячний час на нульовому меридіані, що проходить через «Централдом» у Ньюборні. Довготи Ньюборна книга не наводить.</p>
+          <p>Тому годинник тут рахує час від початку календарного сола: 00:00 — це мить, коли за правилами LMD змінюється дата. На дати це не впливає, а годину варто сприймати як наближену.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Що означають від'ємні роки?</summary>
+        <div class="note-body">
+          <p>Рік 1 за календарем книги почався 3 листопада 2056 і тривав до 21 вересня 2058. Рік 0 і від'ємні роки — це дати до висадки першої експедиції. Наприклад, у жовтні 2026 на Марсі триває рік −15.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Чому Телець 56 такий короткий?</summary>
+        <div class="note-body">
+          <p>Марсіанський рік триває 668,6 сола, а таблиця місяців налічує 668 повних солів. Залишок у 0,6 сола стає 669-м солом, Тельцем 56, «новорічним вечором».</p>
+          <p>Він є щороку й триває від 00:00 до 14:24 за марсіанським годинником, тобто 14 год 48 хв земного часу.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Звідки взято алгоритм?</summary>
+        <div class="note-body">
+          <p>Книга радить онлайн-конвертер сайту Mars Climate Database (LMD). Сайт часто недоступний, тому його розрахунок відтворено з <a href="http://web.archive.org/web/20261004150507/https://www-mars.lmd.jussieu.fr/mars/time/martian_time.html" target="_blank" rel="noopener">архівної копії</a> (martian_time.js) без змін.</p>
+          <p>Марсіанські роки нумеруються за R. T. Clancy et al., JGR 105 (2000): рік 1 почався 11 квітня 1955-го.</p>
+        </div>
+      </details>
     </div>
   </section>
 </main>
 
 <footer>
   <div class="wrap">
-    <p>Джерела: Макс Кідрук, «Нові Темні Віки. Колонія», додаток «Хронометрія»; <a href="http://web.archive.org/web/20261004150507/https://www-mars.lmd.jussieu.fr/mars/time/martian_time.html" target="_blank" rel="noopener">архівна копія конвертера LMD</a>; нумерація марсіанських років за R. T. Clancy et al., JGR 105 (2000).</p>
-    <p>Від'ємні роки й рік 0 — це дати до висадки першої експедиції.</p>
-    <p>Неофіційний фанатський інструмент. Не пов'язаний з автором роману чи видавництвом. <a href="https://github.com/ever-c0de/kolonia-mars-calendar" target="_blank" rel="noopener">Код на GitHub</a>.</p>
+    <p>Неофіційний фанатський інструмент. Не пов'язаний з автором роману чи видавництвом.</p>
+    <p>Джерела: Макс Кідрук, «Нові Темні Віки. Колонія», додаток «Хронометрія» · <a href="https://github.com/ever-c0de/kolonia-mars-calendar" target="_blank" rel="noopener">Код на GitHub</a></p>
   </div>
 </footer>
 
@@ -668,14 +956,7 @@ function parseMarsText(text) {
   const marsDate = (m, d, y) => `${MONTHS[m].name} ${d}, ${fmtYear(y)}`;
   const nf1 = new Intl.NumberFormat('uk-UA', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
   const SEASON_VAR = { 'весна': 'var(--spring)', 'літо': 'var(--summer)', 'осінь': 'var(--autumn)', 'зима': 'var(--winter)' };
-  const EVENTS = [
-    ['ВР', 1, 'весняне рівнодення, Близнюки 1'],
-    ['А', 150, 'афелій, Лев 24'],
-    ['ЛС', 193, 'літнє сонцестояння, Діва 1'],
-    ['ОР', 372, 'осіннє рівнодення, Стрілець 1'],
-    ['П', 484, 'перигелій, Водолій 16'],
-    ['ЗС', 515, 'зимове сонцестояння, Риби 1']
-  ];
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   let localTz = '';
   try { localTz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) { localTz = ''; }
@@ -685,95 +966,260 @@ function parseMarsText(text) {
   const NUM_UTC = new Intl.DateTimeFormat('uk-UA', { timeZone: 'UTC', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
   const RANGE_LOCAL = new Intl.DateTimeFormat('uk-UA', { day: 'numeric', month: 'long', year: 'numeric' });
   const stripYr = (s) => s.replace(/\s?р\.$/, '');
+  const yearOneStart = new Date(msFromJd(solSpan(1 + NTV_SHIFT, 1).startJd));
 
   function marsClock(frac, withSeconds) {
     const total = Math.floor(frac * 86400 + 1e-6);
     const h = Math.floor(total / 3600), m = Math.floor((total % 3600) / 60), s = total % 60;
     return pad(h) + ':' + pad(m) + (withSeconds ? ':' + pad(s) : '');
   }
-
-  function earthLine(jd) {
+  function earthDd(jd) {
     const d = new Date(msFromJd(jd));
     const local = `${stripYr(DATE_LOCAL.format(d))}, ${TIME_LOCAL.format(d)}`;
-    if (localIsUtc) return `${local} UTC`;
-    return `${local} <span class="sub">· UTC ${NUM_UTC.format(d)}</span>`;
+    return localIsUtc ? `${local} UTC` : `${local}<span class="utc">UTC ${NUM_UTC.format(d)}</span>`;
   }
-
   function rangeText(startJd, endJd) {
     const a = new Date(msFromJd(startJd)), b = new Date(msFromJd(endJd));
     try { return stripYr(RANGE_LOCAL.formatRange(a, b)); } catch (e) {
       return `${stripYr(RANGE_LOCAL.format(a))} – ${stripYr(RANGE_LOCAL.format(b))}`;
     }
   }
+  const row = (cls, dt, dd) => `<div class="${cls}"><dt>${dt}</dt><dd>${dd}</dd></div>`;
+  const beforeLanding = '<span class="tag">до висадки</span>';
 
-  const yearOneStart = new Date(msFromJd(solSpan(1 + NTV_SHIFT, 1).startJd));
+  /* ---------- Orbital dial: months are 30° of solar longitude each, as in fig. 1 of the book ---------- */
+  const DEG = Math.PI / 180;
+  const f2 = (n) => n.toFixed(2);
+  const monthLen = (m) => (m === 11 ? MONTHS[11].sols + 0.6 : MONTHS[m].sols);
+  const dialAngle = (m, solInMonth) => m * 30 + 30 * Math.min(solInMonth, monthLen(m)) / monthLen(m);
+  const P = (r, a) => [-r * Math.sin(a * DEG), -r * Math.cos(a * DEG)];   // 0° at the top, counter-clockwise
+  const ORBIT_A = 120, ECC = 0.0934, PERI = dialAngle(8, 15);            // perihelion at Водолій 16
+  const orbitR = (a) => ORBIT_A * (1 - ECC * ECC) / (1 + ECC * Math.cos((a - PERI) * DEG));
+  const BAND_IN = 147, BAND_OUT = 173, LABEL_R = 160;
+  const EVENTS = [
+    ['ВР', 0, 'Весняне рівнодення, Близнюки 1'],
+    ['А', dialAngle(2, 23), 'Афелій, Лев 24'],
+    ['ЛС', 90, 'Літнє сонцестояння, Діва 1'],
+    ['ОР', 180, 'Осіннє рівнодення, Стрілець 1'],
+    ['П', PERI, 'Перигелій, Водолій 16'],
+    ['ЗС', 270, 'Зимове сонцестояння, Риби 1']
+  ];
 
-  /* Static parts: month select, ribbon, table, legend */
+  function annulus(a0, a1, r0, r1) {
+    const [x0, y0] = P(r1, a0), [x1, y1] = P(r1, a1), [x2, y2] = P(r0, a1), [x3, y3] = P(r0, a0);
+    const large = a1 - a0 > 180 ? 1 : 0;
+    return `M${f2(x0)} ${f2(y0)}A${r1} ${r1} 0 ${large} 0 ${f2(x1)} ${f2(y1)}L${f2(x2)} ${f2(y2)}A${r0} ${r0} 0 ${large} 1 ${f2(x3)} ${f2(y3)}Z`;
+  }
+  function labelArc(id, a0, a1, r) {
+    // Upright text: clockwise along the top half, counter-clockwise along the bottom half
+    const bottom = (a0 + a1) / 2 > 90 && (a0 + a1) / 2 < 270;
+    const [sx, sy] = P(r, bottom ? a0 : a1), [ex, ey] = P(r, bottom ? a1 : a0);
+    return `<path id="${id}" d="M${f2(sx)} ${f2(sy)}A${r} ${r} 0 0 ${bottom ? 0 : 1} ${f2(ex)} ${f2(ey)}" fill="none"/>`;
+  }
+
+  (function buildDial() {
+    let orbit = '';
+    for (let a = 0; a <= 360; a += 2) {
+      const [x, y] = P(orbitR(a), a);
+      orbit += (a ? 'L' : 'M') + f2(x) + ' ' + f2(y);
+    }
+    orbit += 'Z';
+    let s = `<defs>
+      <radialGradient id="sunGlow"><stop offset="0" stop-color="#FFD59A" stop-opacity=".5"/><stop offset="1" stop-color="#FFD59A" stop-opacity="0"/></radialGradient>
+      <radialGradient id="sunCore" cx="45%" cy="40%"><stop offset="0" stop-color="#FFF6DE"/><stop offset=".6" stop-color="#FFC56B"/><stop offset="1" stop-color="#F08A2C"/></radialGradient>
+      <radialGradient id="marsLit" cx="50%" cy="32%" fx="50%" fy="12%" r="78%"><stop offset="0" stop-color="#F7B48C"/><stop offset=".45" stop-color="#D2582A"/><stop offset="1" stop-color="#3B1408"/></radialGradient>
+      <pattern id="hatch" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="2" height="5" fill="#E9B27C" opacity=".8"/></pattern>`;
+    MONTHS.forEach((M, i) => { s += labelArc('arc' + i, i * 30 + 1, i * 30 + 29, LABEL_R); });
+    s += '</defs>';
+    for (let i = 0; i < 12; i++) {
+      const [x0, y0] = P(24, i * 30), [x1, y1] = P(BAND_IN - 5, i * 30);
+      s += `<line class="dial-spoke" x1="${f2(x0)}" y1="${f2(y0)}" x2="${f2(x1)}" y2="${f2(y1)}"/>`;
+    }
+    MONTHS.forEach((M, i) => {
+      s += `<path class="dial-band" data-i="${i}" d="${annulus(i * 30 + .5, i * 30 + 29.5, BAND_IN, BAND_OUT)}" style="fill:${SEASON_VAR[M.season]}"/>`;
+      s += `<text class="dial-month" dominant-baseline="central"><textPath href="#arc${i}" startOffset="50%" text-anchor="middle">${M.name}</textPath></text>`;
+    });
+    s += `<path d="${annulus(210, 300, 137, 142)}" fill="url(#hatch)"><title>Сезон пилових бур</title></path>`;
+    EVENTS.forEach(([abbr, a, title]) => {
+      const [x0, y0] = P(BAND_OUT + 2, a), [x1, y1] = P(BAND_OUT + 9, a), [tx, ty] = P(BAND_OUT + 20, a);
+      s += `<g><title>${title}</title><line class="dial-evtick" x1="${f2(x0)}" y1="${f2(y0)}" x2="${f2(x1)}" y2="${f2(y1)}"/>` +
+        `<text class="dial-ev" x="${f2(tx)}" y="${f2(ty)}" text-anchor="middle" dominant-baseline="central">${abbr}</text></g>`;
+    });
+    s += `<path class="dial-orbit" d="${orbit}"/><path class="dial-orbit-draw" d="${orbit}" pathLength="1"/>`;
+    s += '<circle r="42" fill="url(#sunGlow)"/><circle r="12" fill="url(#sunCore)"/>';
+    s += '<g id="dialSel" style="display:none"><line class="sel-spoke" id="selSpoke"/><circle class="sel-ring" id="selRing" r="14"/></g>';
+    s += '<g id="dialMars"><circle class="mars-pulse" r="15"/><circle r="8.5" fill="url(#marsLit)"/></g>';
+    $('dial').insertAdjacentHTML('beforeend', s);
+  })();
+
+  function placeMars(angle) {
+    const [x, y] = P(orbitR(angle), angle);
+    // rotate so the lit side of the planet faces the Sun
+    $('dialMars').setAttribute('transform', `translate(${f2(x)} ${f2(y)}) rotate(${f2(180 - angle)})`);
+  }
+  function placeSel(angle) {
+    const r = orbitR(angle);
+    const [x, y] = P(r, angle), [x0, y0] = P(r + 14, angle), [x1, y1] = P(BAND_IN - 2, angle);
+    $('selRing').setAttribute('cx', f2(x));
+    $('selRing').setAttribute('cy', f2(y));
+    const sp = $('selSpoke');
+    sp.setAttribute('x1', f2(x0)); sp.setAttribute('y1', f2(y0));
+    sp.setAttribute('x2', f2(x1)); sp.setAttribute('y2', f2(y1));
+  }
+
+  /* ---------- Selection shared by the dial and the month grid ---------- */
+  let active = 'm2e';
+  let m2eState = null, e2mState = null, nowMonth = -1;
+  const cards = [...document.querySelectorAll('#months .month')];
+  const bands = [...document.querySelectorAll('.dial-band')];
+
+  function updateBadges() {
+    const st = active === 'e2m' ? e2mState : m2eState;
+    cards.forEach((c, i) => {
+      const sel = !!st && st.month === i, now = nowMonth === i;
+      c.classList.toggle('is-sel', sel);
+      c.classList.toggle('is-now', now);
+      bands[i].classList.toggle('is-sel', sel);
+      const html = (now ? '<span class="badge now">зараз</span>' : '') + (sel ? '<span class="badge sel">обрана дата</span>' : '');
+      const box = c.querySelector('.m-badges');
+      if (box.innerHTML !== html) box.innerHTML = html;
+    });
+  }
+  function refreshSelection() {
+    const st = active === 'e2m' ? e2mState : m2eState;
+    const g = $('dialSel');
+    if (st) { g.style.display = ''; placeSel(dialAngle(st.month, st.solInMonth)); } else { g.style.display = 'none'; }
+    updateBadges();
+  }
+
+  /* ---------- Tabs ---------- */
+  const tabs = [$('tab-m2e'), $('tab-e2m')];
+  function selectTab(which, focus) {
+    active = which;
+    tabs.forEach((t) => {
+      const on = t.id === 'tab-' + which;
+      t.setAttribute('aria-selected', String(on));
+      t.tabIndex = on ? 0 : -1;
+      if (on && focus) t.focus();
+    });
+    $('panel-m2e').hidden = which !== 'm2e';
+    $('panel-e2m').hidden = which !== 'e2m';
+    refreshSelection();
+  }
+  tabs.forEach((t) => {
+    t.addEventListener('click', () => selectTab(t.id.slice(4)));
+    t.addEventListener('keydown', (e) => {
+      if (['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) {
+        e.preventDefault();
+        selectTab(active === 'm2e' ? 'e2m' : 'm2e', true);
+      }
+    });
+  });
+  $('ctaConvert').addEventListener('click', () => selectTab('m2e'));
+
+  /* ---------- Mars -> Earth ---------- */
   $('mMonth').innerHTML = MONTHS.map((M, i) => `<option value="${i}">${M.name}</option>`).join('');
   $('mMonth').value = '11';
-  $('eTzLocal').textContent = localTz ? `Мій час (${localTz})` : 'Мій час';
 
-  $('ribbon').innerHTML = MONTHS.map((M, i) => {
-    const grow = i === 11 ? M.sols + 0.6 : M.sols;
-    return `<div class="seg" data-i="${i}" style="flex:${grow} 1 0;--c:${SEASON_VAR[M.season]}" title="${M.name}: ${M.sols} ${solWord(M.sols)}${i === 11 ? ' + новорічний вечір' : ''}">` +
-      `<span><b class="full">${M.name}</b><b class="abbr">${M.abbr}</b></span><small>${M.sols}</small></div>`;
-  }).join('');
-  const wrap = $('ribbonWrap');
-  EVENTS.forEach(([abbr, sol, title]) => {
-    const el = document.createElement('span');
-    const pct = (sol - 1) / LMD.YEAR * 100;
-    el.className = 'ev' + (pct < 2 ? ' start' : '');
-    el.style.left = pct + '%';
-    el.title = title;
-    el.textContent = abbr;
-    wrap.appendChild(el);
+  function readMarsFields() {
+    const t = $('mTime').value;
+    let clock = null;
+    if (t) {
+      const [h, mi] = t.split(':').map(Number);
+      clock = h * 3600 + mi * 60;
+    }
+    return {
+      month: Number($('mMonth').value),
+      day: $('mDay').value === '' ? NaN : Number($('mDay').value),
+      year: $('mYear').value === '' ? NaN : Number($('mYear').value),
+      clock
+    };
+  }
+  function renderM2E() {
+    const box = $('m2eResult');
+    const f = readMarsFields();
+    const res = marsToEarth(f.year, f.month, f.day, f.clock);
+    if (res.error) {
+      box.innerHTML = `<p class="res-label">На Землі</p><p class="error">${res.error}</p>`;
+      m2eState = null;
+      refreshSelection();
+      return;
+    }
+    const M = MONTHS[res.month];
+    const hasMoment = res.momentJd != null;
+    let big;
+    if (hasMoment) {
+      const d = new Date(msFromJd(res.momentJd));
+      big = `${stripYr(RANGE_LOCAL.format(d))}, ${TIME_LOCAL.format(d)}`;
+    } else {
+      big = rangeText(res.span.startJd, res.span.endJd);
+    }
+    box.innerHTML =
+      `<p class="res-label">${hasMoment ? 'На Землі в цю мить' : 'Цей сол на Землі'}</p>` +
+      `<p class="res-big">${big}</p>` +
+      `<p class="res-sub">${marsDate(res.month, res.day, res.year)}${res.year <= 0 ? beforeLanding : ''}</p>` +
+      `<dl class="telemetry">` +
+        (hasMoment ? row('full hl', `О ${marsClock(res.frac)} на Марсі`, earthDd(res.momentJd)) : '') +
+        row('full', 'Сол починається · 00:00', earthDd(res.span.startJd)) +
+        row('full', `Сол закінчується · ${res.span.length < 1 ? '14:24' : '24:00'}`, earthDd(res.span.endJd)) +
+        row('', 'Сол року', `<span class="num">${res.solNumber} / ${LAST_SOL}</span>`) +
+        row('', 'Ls', `<span class="num">${nf1.format(res.ls)}°</span>`) +
+        row('', 'Пора року', M.season) +
+        row('', 'Рік за Кленсі', `<span class="num">${res.my}</span>`) +
+      `</dl>`;
+    m2eState = { month: res.month, solInMonth: res.day - 1 + (res.frac == null ? res.span.length / 2 : res.frac) };
+    refreshSelection();
+  }
+  function updateDayMax() {
+    const m = Number($('mMonth').value);
+    $('mDay').max = String(m === 11 ? 56 : MONTHS[m].sols);
+  }
+  function syncTextFromFields() {
+    const f = readMarsFields();
+    if (Number.isInteger(f.day) && Number.isInteger(f.year)) $('mText').value = marsDate(f.month, f.day, f.year);
+    $('mText').removeAttribute('aria-invalid');
+  }
+  function setMarsFields(month, day, year) {
+    $('mMonth').value = String(month);
+    $('mDay').value = String(day);
+    $('mYear').value = String(year);
+    updateDayMax();
+  }
+  $('mText').addEventListener('input', () => {
+    const p = parseMarsText($('mText').value);
+    if (!p) {
+      $('mText').setAttribute('aria-invalid', 'true');
+      $('m2eResult').innerHTML = '<p class="res-label">На Землі</p><p class="error">Не вдалося розпізнати дату. Напишіть її як у книзі: назва місяця, сол, кома, рік. Наприклад: Козеріг 21, 46.</p>';
+      m2eState = null;
+      refreshSelection();
+      return;
+    }
+    $('mText').removeAttribute('aria-invalid');
+    setMarsFields(p.month, p.day, p.year);
+    renderM2E();
   });
-  const storm = document.createElement('span');
-  storm.className = 'storm';
-  storm.style.left = (MONTHS[7].start - 1) / LMD.YEAR * 100 + '%';
-  storm.style.width = (MONTHS[10].start - MONTHS[7].start) / LMD.YEAR * 100 + '%';
-  storm.textContent = 'сезон пилових бур';
-  wrap.appendChild(storm);
+  ['mMonth', 'mDay', 'mYear'].forEach((id) => $(id).addEventListener('input', () => {
+    updateDayMax();
+    syncTextFromFields();
+    renderM2E();
+  }));
+  $('mTime').addEventListener('input', renderM2E);
+  $('mBook').addEventListener('click', () => {
+    setMarsFields(11, 17, 46);
+    $('mTime').value = '';
+    syncTextFromFields();
+    renderM2E();
+  });
+  $('mToday').addEventListener('click', () => {
+    const r = earthToMars(Date.now());
+    setMarsFields(r.month, r.day, r.year);
+    $('mTime').value = '';
+    syncTextFromFields();
+    renderM2E();
+  });
 
-  $('legend').innerHTML =
-    ['весна', 'літо', 'осінь', 'зима'].map((s) => `<li><span class="dot" style="--c:${SEASON_VAR[s]}"></span>${s}</li>`).join('') +
-    '<li><span class="hatch"></span>сезон пилових бур</li>' +
-    '<li>ВР, ОР — рівнодення</li><li>ЛС, ЗС — сонцестояння</li><li>А — афелій, П — перигелій</li>';
-
-  $('monthRows').innerHTML = MONTHS.map((M, i) =>
-    `<tr data-i="${i}"><td class="num">${i + 1}</td>` +
-    `<td><span class="dot m-dot" style="--c:${SEASON_VAR[M.season]}"></span><b>${M.name}</b>` +
-    (M.note ? `<span class="m-note">${M.note}</span>` : '') + `</td>` +
-    `<td class="num">${i === 11 ? '55 + 1' : M.sols}</td><td class="num">${M.start}</td>` +
-    `<td class="col-season"><span class="dot" style="--c:${SEASON_VAR[M.season]}"></span>${M.season}</td>` +
-    `<td class="notes col-notes">${M.note}</td></tr>`).join('');
-
-  /* Selection shown on the ribbon and in the table */
-  let active = 'e2m';
-  let e2mState = null, m2eState = null;
-
-  function placeMarker(el, solPos) {
-    const pct = Math.min(100, Math.max(0, solPos / LMD.YEAR * 100));
-    el.style.left = pct + '%';
-    el.classList.toggle('start', pct < 9);
-    el.classList.toggle('end', pct > 91);
-  }
-
-  function refreshSelection() {
-    $('e2mCard').classList.toggle('is-active', active === 'e2m');
-    $('m2eCard').classList.toggle('is-active', active === 'm2e');
-    document.querySelectorAll('.seg.is-current, #monthRows tr.is-current').forEach((el) => el.classList.remove('is-current'));
-    const st = active === 'e2m' ? e2mState : m2eState;
-    const mk = $('mkSel');
-    if (!st) { mk.hidden = true; return; }
-    mk.hidden = false;
-    $('mkSelTag').textContent = st.label;
-    placeMarker(mk, st.solNumber - 1 + st.frac);
-    document.querySelector(`.seg[data-i="${st.month}"]`).classList.add('is-current');
-    document.querySelector(`#monthRows tr[data-i="${st.month}"]`).classList.add('is-current');
-  }
-
-  /* Earth -> Mars */
+  /* ---------- Earth -> Mars ---------- */
+  $('eTzLocal').textContent = localTz ? `Мій час (${localTz})` : 'Мій час';
   function readEarth() {
     const dv = $('eDate').value;
     if (!dv) return { error: 'Оберіть земну дату.' };
@@ -792,12 +1238,11 @@ function parseMarsText(text) {
     }
     return { ms: dt.getTime() };
   }
-
   function renderE2M() {
     const box = $('e2mResult');
     const inp = readEarth();
     if (inp.error) {
-      box.innerHTML = `<p class="error">${inp.error}</p>`;
+      box.innerHTML = `<p class="res-label">На Марсі</p><p class="error">${inp.error}</p>`;
       e2mState = null;
       refreshSelection();
       return;
@@ -805,156 +1250,77 @@ function parseMarsText(text) {
     const r = earthToMars(inp.ms);
     const M = MONTHS[r.month];
     const span = solSpan(r.my, r.solNumber);
-    const notes = [];
-    if (r.my === 100 && r.solNumber === 443) {
-      notes.push('У книзі (с. 908) ця дата названа «Козеріг 21, 46». Там від 443 відняли 422 без +1. За таблицею 422-й сол уже Козеріг 1, тож 443-й — Козеріг 22.');
-    }
-    if (r.solNumber === LAST_SOL) notes.push('Це 669-й сол, «новорічний вечір». Він коротший за інші: 0,6 сола, до 14:24 за марсіанським годинником.');
-    if (r.year <= 0) notes.push(`Рік ${fmtYear(r.year)}: це ще до висадки першої експедиції. Рік 1 почався ${stripYr(RANGE_LOCAL.format(yearOneStart))}.`);
     box.innerHTML =
-      `<p class="big">${marsDate(r.month, r.day, r.year)}</p>` +
-      `<p class="reading">${r.day}-й сол місяця ${M.gen} · ${M.season} у північній півкулі</p>` +
-      `<dl class="facts">` +
-        `<div><dt>Номер сола (Sol number)</dt><dd class="mono">${r.solNumber} з ${LAST_SOL}</dd></div>` +
-        `<div><dt>Рік за Кленсі − 54</dt><dd class="mono">${r.my} − 54 = ${fmtYear(r.year)}</dd></div>` +
-        `<div><dt>Сонячна довгота Ls</dt><dd class="mono">${nf1.format(r.ls)}°</dd></div>` +
-        `<div><dt>Марсіанський годинник</dt><dd class="mono">${marsClock(r.dayFraction)}</dd></div>` +
-        `<div class="span2"><dt>Цей сол на Землі</dt><dd>${earthLine(span.startJd)}<br>→ ${earthLine(span.endJd)}</dd></div>` +
-      `</dl>` +
-      notes.map((n) => `<p class="note">${n}</p>`).join('');
-    e2mState = { solNumber: r.solNumber, frac: r.dayFraction, month: r.month, label: marsDate(r.month, r.day, r.year) };
+      `<p class="res-label">На Марсі</p>` +
+      `<p class="res-big">${marsDate(r.month, r.day, r.year)}</p>` +
+      `<p class="res-sub">${r.day}-й сол місяця ${M.gen} · ${M.season} у північній півкулі${r.year <= 0 ? beforeLanding : ''}</p>` +
+      `<dl class="telemetry">` +
+        row('', 'Сол року', `<span class="num">${r.solNumber} / ${LAST_SOL}</span>`) +
+        row('', 'Рік за Кленсі − 54', `<span class="num">${r.my} − 54 = ${fmtYear(r.year)}</span>`) +
+        row('', 'Ls', `<span class="num">${nf1.format(r.ls)}°</span>`) +
+        row('', 'Марсіанський годинник', `<span class="num">${marsClock(r.dayFraction)}</span>`) +
+        row('full', 'Сол починається', earthDd(span.startJd)) +
+        row('full', 'Сол закінчується', earthDd(span.endJd)) +
+      `</dl>`;
+    e2mState = { month: r.month, solInMonth: r.day - 1 + r.dayFraction };
     refreshSelection();
   }
-
-  /* Mars -> Earth */
-  function readMarsFields() {
-    const t = $('mTime').value;
-    let clock = null;
-    if (t) {
-      const [h, mi] = t.split(':').map(Number);
-      clock = h * 3600 + mi * 60;
-    }
-    return {
-      month: Number($('mMonth').value),
-      day: $('mDay').value === '' ? NaN : Number($('mDay').value),
-      year: $('mYear').value === '' ? NaN : Number($('mYear').value),
-      clock
-    };
-  }
-
-  function renderM2E() {
-    const box = $('m2eResult');
-    const f = readMarsFields();
-    const res = marsToEarth(f.year, f.month, f.day, f.clock);
-    if (res.error) {
-      box.innerHTML = `<p class="error">${res.error}</p>`;
-      m2eState = null;
-      refreshSelection();
-      return;
-    }
-    const M = MONTHS[res.month];
-    const notes = [];
-    if (res.month === 7 && res.day === 21 && res.year === 46) {
-      notes.push('У книзі «Козеріг 21, 46» названо 23 вересня 2142. За таблицею це на сол раніше: 23 вересня 2142 припадає на Козеріг 22, 46.');
-    }
-    if (res.solNumber === LAST_SOL) notes.push('Телець 56 — «новорічний вечір», 669-й сол. Він триває 0,6 сола: від 00:00 до 14:24 за марсіанським годинником, тобто 14 год 48 хв земних.');
-    if (res.year <= 0) notes.push(`Рік ${fmtYear(res.year)}: це ще до висадки першої експедиції. Рік 1 почався ${stripYr(RANGE_LOCAL.format(yearOneStart))}.`);
-    const endClock = res.span.length < 1 ? '14:24' : '24:00';
-    const big = res.momentJd != null
-      ? (() => { const d = new Date(msFromJd(res.momentJd)); return `${stripYr(RANGE_LOCAL.format(d))}, ${TIME_LOCAL.format(d)}`; })()
-      : rangeText(res.span.startJd, res.span.endJd);
-    box.innerHTML =
-      `<p class="big">${big}</p>` +
-      `<p class="reading">${res.solNumber}-й сол року · рік за Кленсі ${res.my} · Ls ${nf1.format(res.ls)}° · ${M.season}</p>` +
-      `<dl class="facts">` +
-        (res.momentJd != null ? `<div class="span2 hl"><dt>О ${marsClock(res.frac)} на марсіанському годиннику</dt><dd>${earthLine(res.momentJd)}</dd></div>` : '') +
-        `<div class="span2"><dt>Сол починається (00:00 на Марсі)</dt><dd>${earthLine(res.span.startJd)}</dd></div>` +
-        `<div class="span2"><dt>Сол закінчується (${endClock} на Марсі)</dt><dd>${earthLine(res.span.endJd)}</dd></div>` +
-      `</dl>` +
-      notes.map((n) => `<p class="note">${n}</p>`).join('');
-    m2eState = {
-      solNumber: res.solNumber,
-      frac: res.frac == null ? res.span.length / 2 : res.frac,
-      month: res.month,
-      label: marsDate(res.month, res.day, res.year)
-    };
-    refreshSelection();
-  }
-
-  function updateDayMax() {
-    const m = Number($('mMonth').value);
-    $('mDay').max = String(m === 11 ? 56 : MONTHS[m].sols);
-  }
-
-  function syncTextFromFields() {
-    const f = readMarsFields();
-    if (Number.isInteger(f.day) && Number.isInteger(f.year)) $('mText').value = marsDate(f.month, f.day, f.year);
-    $('mText').removeAttribute('aria-invalid');
-  }
-
-  function setMarsFields(month, day, year) {
-    $('mMonth').value = String(month);
-    $('mDay').value = String(day);
-    $('mYear').value = String(year);
-    updateDayMax();
-  }
-
-  /* Wiring */
-  ['eDate', 'eTime', 'eTz'].forEach((id) => $(id).addEventListener('input', () => { active = 'e2m'; renderE2M(); }));
+  ['eDate', 'eTime', 'eTz'].forEach((id) => $(id).addEventListener('input', renderE2M));
+  $('eBook').addEventListener('click', () => {
+    $('eDate').value = '2142-09-23';
+    $('eTime').value = '12:00';
+    $('eTz').value = 'utc';
+    renderE2M();
+  });
   $('eNow').addEventListener('click', () => {
     const n = new Date();
     $('eDate').value = `${String(n.getFullYear()).padStart(4, '0')}-${pad(n.getMonth() + 1)}-${pad(n.getDate())}`;
     $('eTime').value = `${pad(n.getHours())}:${pad(n.getMinutes())}`;
     $('eTz').value = 'local';
-    active = 'e2m';
-    renderE2M();
-  });
-  $('eBook').addEventListener('click', () => {
-    $('eDate').value = '2142-09-23';
-    $('eTime').value = '12:00';
-    $('eTz').value = 'utc';
-    active = 'e2m';
     renderE2M();
   });
 
-  $('mText').addEventListener('input', () => {
-    active = 'm2e';
-    const p = parseMarsText($('mText').value);
-    if (!p) {
-      $('mText').setAttribute('aria-invalid', 'true');
-      $('m2eResult').innerHTML = '<p class="error">Не вдалося розпізнати дату. Напишіть її як у книзі: назва місяця, сол, кома, рік. Наприклад: Козеріг 21, 46.</p>';
-      m2eState = null;
-      refreshSelection();
-      return;
-    }
-    $('mText').removeAttribute('aria-invalid');
-    setMarsFields(p.month, p.day, p.year);
-    renderM2E();
+  /* ---------- Method slider (manual only, no auto-advance) ---------- */
+  const track = $('slides');
+  const slides = [...track.children];
+  const dots = slides.map((s, i) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'dot';
+    b.setAttribute('aria-label', `Крок ${i + 1}`);
+    b.addEventListener('click', () => goTo(i));
+    $('dots').appendChild(b);
+    return b;
   });
-  ['mMonth', 'mDay', 'mYear'].forEach((id) => $(id).addEventListener('input', () => {
-    active = 'm2e';
-    updateDayMax();
-    syncTextFromFields();
-    renderM2E();
-  }));
-  $('mTime').addEventListener('input', () => { active = 'm2e'; renderM2E(); });
-  $('mToday').addEventListener('click', () => {
-    const r = earthToMars(Date.now());
-    setMarsFields(r.month, r.day, r.year);
-    $('mTime').value = '';
-    syncTextFromFields();
-    active = 'm2e';
-    renderM2E();
+  let current = -1;
+  function goTo(i) {
+    const idx = Math.max(0, Math.min(slides.length - 1, i));
+    track.scrollTo({ left: idx * track.clientWidth, behavior: reduceMotion ? 'auto' : 'smooth' });
+    setCurrent(idx);
+  }
+  function setCurrent(idx) {
+    if (idx === current) return;
+    current = idx;
+    $('stepCount').innerHTML = `Крок <b>${idx + 1}</b> / ${slides.length}`;
+    dots.forEach((d, i) => (i === idx ? d.setAttribute('aria-current', 'step') : d.removeAttribute('aria-current')));
+    $('prevStep').disabled = idx === 0;
+    $('nextStep').disabled = idx === slides.length - 1;
+  }
+  let scrollTick = 0;
+  track.addEventListener('scroll', () => {
+    cancelAnimationFrame(scrollTick);
+    scrollTick = requestAnimationFrame(() => setCurrent(Math.round(track.scrollLeft / Math.max(1, track.clientWidth))));
   });
-  $('mBook').addEventListener('click', () => {
-    setMarsFields(11, 17, 46);
-    $('mTime').value = '';
-    syncTextFromFields();
-    active = 'm2e';
-    renderM2E();
+  track.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight') { e.preventDefault(); goTo(current + 1); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); goTo(current - 1); }
   });
+  $('prevStep').addEventListener('click', () => goTo(current - 1));
+  $('nextStep').addEventListener('click', () => goTo(current + 1));
+  window.addEventListener('resize', () => { track.scrollLeft = current * track.clientWidth; });
+  setCurrent(0);
 
-  /* Duration converter (Zubrin's Martian second) */
+  /* ---------- Duration converter (Zubrin's Martian second) ---------- */
   const MARS_SECOND = 88775.244 / 86400;
   function parseDur(s) {
     const m = String(s).trim().match(/^(\d+)(?::(\d{1,2}))?(?::(\d{1,2}(?:[.,]\d+)?))?$/);
@@ -977,25 +1343,59 @@ function parseMarsText(text) {
   linkDur('dMars', 'dEarth', MARS_SECOND);
   linkDur('dEarth', 'dMars', 1 / MARS_SECOND);
 
-  /* Live "now on Mars" */
+  /* ---------- Live "now on Mars" ---------- */
+  const setText = (id, text) => { const el = $(id); if (el.textContent !== text) el.textContent = text; };
   function tick() {
     const r = earthToMars(Date.now());
-    $('nowDate').textContent = marsDate(r.month, r.day, r.year);
-    $('nowClock').innerHTML = `${marsClock(r.dayFraction, true)}<small>марс. год</small>`;
-    $('nowMeta').textContent = `Сол ${r.solNumber} · рік за Кленсі ${r.my} · Ls ${nf1.format(r.ls)}° · ${MONTHS[r.month].season} у північній півкулі`;
+    setText('nowDate', marsDate(r.month, r.day, r.year));
+    const clock = `${marsClock(r.dayFraction, true)}<small>марс. год</small>`;
+    if ($('nowClock').innerHTML !== clock) $('nowClock').innerHTML = clock;
+    setText('nowSol', `${r.solNumber} / ${LAST_SOL}`);
+    setText('nowLs', `${nf1.format(r.ls)}°`);
+    setText('nowSeason', MONTHS[r.month].season);
     const note = $('nowNote');
-    if (r.year <= 0) {
-      note.hidden = false;
-      note.textContent = `Рік ${fmtYear(r.year)}: до висадки першої експедиції. Рік 1 почнеться ${stripYr(RANGE_LOCAL.format(yearOneStart))}.`;
-    } else {
-      note.hidden = true;
-    }
-    placeMarker($('mkNow'), r.solNumber - 1 + r.dayFraction);
+    note.hidden = r.year > 0;
+    if (r.year <= 0) setText('nowNote', `Рік ${fmtYear(r.year)}: до висадки першої експедиції. Рік 1 почнеться ${stripYr(RANGE_LOCAL.format(yearOneStart))}.`);
+    placeMars(dialAngle(r.month, r.day - 1 + r.dayFraction));
+    if (nowMonth !== r.month) { nowMonth = r.month; updateBadges(); }
   }
 
+  /* ---------- Starfield ---------- */
+  const cv = $('stars');
+  const ctx = cv.getContext && cv.getContext('2d');
+  let starsWidth = 0;
+  function drawStars() {
+    if (!ctx) return;
+    const w = window.innerWidth, h = Math.max(window.innerHeight, window.screen ? window.screen.height : 0);
+    if (w === starsWidth) return;
+    starsWidth = w;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    cv.width = Math.round(w * dpr);
+    cv.height = Math.round(h * dpr);
+    cv.style.width = w + 'px';
+    cv.style.height = h + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    let seed = 20571;
+    const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+    const n = Math.min(650, Math.round((w * h) / 2600));
+    for (let i = 0; i < n; i++) {
+      const x = rnd() * w, y = rnd() * h;
+      const big = rnd() > 0.93;
+      const r = big ? 0.9 + rnd() * 0.7 : 0.3 + rnd() * 0.55;
+      const a = (0.25 + rnd() * 0.6).toFixed(2), t = rnd();
+      ctx.fillStyle = t < 0.06 ? `rgba(233,178,124,${a})` : t < 0.1 ? `rgba(142,197,232,${a})` : `rgba(238,241,246,${a})`;
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  let resizeTimer = 0;
+  window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(drawStars, 150); });
+
+  drawStars();
   updateDayMax();
-  renderM2E();
   renderE2M();
+  renderM2E();
   tick();
   setInterval(tick, 250);
 })();
