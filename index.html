@@ -3,10 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Конвертер дат між земним і марсіанським календарем «Нових Темних Віків» Макса Кідрука за правилами з додатка «Хронометрія».">
+<meta name="description" content="Переводить марсіанські дати з роману Макса Кідрука «Колонія» («Телець 17, 46») у земні й навпаки за правилами додатка «Хронометрія».">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Хронометрія «Колонії»">
-<meta property="og:description" content="Конвертер дат між земним і марсіанським календарем «Нових Темних Віків» Макса Кідрука за правилами з додатка «Хронометрія».">
+<meta property="og:locale" content="uk_UA">
+<meta property="og:site_name" content="Хронометрія «Колонії»">
+<meta property="og:title" content="Хронометрія «Колонії» — марсіанський календар і конвертер дат">
+<meta name="twitter:card" content="summary">
+<meta property="og:description" content="Переводить марсіанські дати з роману Макса Кідрука «Колонія» («Телець 17, 46») у земні й навпаки за правилами додатка «Хронометрія».">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2213%22%20fill%3D%22%23B4532A%22%2F%3E%3Cpath%20d%3D%22M6%2013c5%202%2013%202%2020-1%22%20stroke%3D%22%237A2E14%22%20stroke-width%3D%222.4%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%2F%3E%3Ccircle%20cx%3D%2220%22%20cy%3D%2220%22%20r%3D%222.6%22%20fill%3D%22%237A2E14%22%2F%3E%3C%2Fsvg%3E">
 <style>
 :root { color-scheme: light; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
@@ -14,7 +17,7 @@ body { margin: 0; }
 img { max-width: 100%; }
 [hidden] { display: none !important; }
 </style>
-<title>Хронометрія «Колонії»</title>
+<title>Хронометрія «Колонії» — марсіанський календар і конвертер дат</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600&family=Onest:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
@@ -116,7 +119,7 @@ h1 {
   text-transform: uppercase;
   color: var(--muted);
 }
-.now-date { font: 600 var(--step-2)/1.15 var(--font-display); }
+.now-date { font: 600 clamp(1.25rem, 1rem + 1.5vw, 1.5rem)/1.15 var(--font-display); }
 .now-clock {
   font: 500 var(--step-3)/1 var(--font-mono);
   font-variant-numeric: tabular-nums;
@@ -127,7 +130,8 @@ h1 {
 .now-meta, .now-note { font-size: var(--step--1); color: var(--muted); }
 
 /* Converter consoles */
-main { padding-block: 2rem 3rem; display: grid; gap: 3rem; }
+main { padding-block: 2rem 3rem; display: grid; grid-template-columns: minmax(0, 1fr); gap: 3rem; }
+main > * { min-width: 0; }
 .consoles {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr));
@@ -179,6 +183,11 @@ input, select {
   min-width: 0;
 }
 select, #mText { font-family: var(--font-body); }
+input::-webkit-date-and-time-value { text-align: left; }
+@supports (-webkit-touch-callout: none) {
+  /* iOS Safari sizes native date/time fields on its own and can push them past the column */
+  input[type="date"], input[type="time"] { -webkit-appearance: none; min-height: 2.75rem; }
+}
 #mText { font-size: 1.0625rem; font-weight: 500; }
 input[aria-invalid="true"] { border-color: var(--rust); }
 .result { border-top: 1px dashed var(--line); padding-top: 1.1rem; display: grid; gap: .65rem; min-width: 0; }
@@ -210,13 +219,19 @@ dd { margin: 0; font-variant-numeric: tabular-nums; }
 
 /* Year ribbon */
 .scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-.ribbon-wrap { position: relative; min-width: 34rem; height: 9.9rem; }
+.ribbon-wrap {
+  --rib-top: 2rem;
+  --rib-h: 3.5rem;
+  position: relative;
+  min-width: 18rem;
+  height: calc(var(--rib-top) + var(--rib-h) + 4.4rem);
+}
 .ribbon {
   position: absolute;
-  top: 2rem;
+  top: var(--rib-top);
   left: 0;
   right: 0;
-  height: 3.5rem;
+  height: var(--rib-h);
   display: flex;
   border-radius: 8px;
   overflow: hidden;
@@ -248,7 +263,7 @@ dd { margin: 0; font-variant-numeric: tabular-nums; }
 .seg.is-current { background: color-mix(in oklab, var(--c) 52%, var(--surface)); }
 .ev {
   position: absolute;
-  top: 5.55rem;
+  top: calc(var(--rib-top) + var(--rib-h) + .05rem);
   transform: translateX(-50%);
   font: 500 .6875rem/1 var(--font-mono);
   color: var(--muted);
@@ -259,7 +274,7 @@ dd { margin: 0; font-variant-numeric: tabular-nums; }
 .ev.start::before { margin-left: 0; }
 .storm {
   position: absolute;
-  top: 6.95rem;
+  top: calc(var(--rib-top) + var(--rib-h) + 1.45rem);
   height: 1.15rem;
   border-radius: 4px;
   background: repeating-linear-gradient(135deg, color-mix(in oklab, var(--dust) 50%, transparent) 0 5px, transparent 5px 9px);
@@ -271,10 +286,10 @@ dd { margin: 0; font-variant-numeric: tabular-nums; }
 }
 .marker { position: absolute; top: 0; bottom: 0; width: 0; pointer-events: none; transition: left .35s ease; }
 .marker::before { content: ""; position: absolute; left: -1px; width: 2px; background: var(--mk); }
-.marker.sel { --mk: var(--rust); }
-.marker.sel::before { top: 1.45rem; height: 4.05rem; }
-.marker.now { --mk: var(--sky); }
-.marker.now::before { top: 2rem; height: 6.6rem; opacity: .8; }
+.marker.mk-sel { --mk: var(--rust); }
+.marker.mk-sel::before { top: 1.45rem; height: calc(var(--rib-top) + var(--rib-h) - 1.45rem); }
+.marker.mk-now { --mk: var(--sky); }
+.marker.mk-now::before { top: var(--rib-top); height: calc(var(--rib-h) + 3.1rem); opacity: .8; }
 .tag {
   position: absolute;
   transform: translateX(-50%);
@@ -285,13 +300,20 @@ dd { margin: 0; font-variant-numeric: tabular-nums; }
   background: var(--mk);
   color: var(--on-accent);
 }
-.marker.sel .tag { top: 0; }
-.marker.now .tag { top: 8.6rem; }
+.marker.mk-sel .tag { top: 0; }
+.marker.mk-now .tag { top: calc(var(--rib-top) + var(--rib-h) + 3.1rem); }
 .marker.start .tag { transform: translateX(-2px); }
 .marker.end .tag { transform: translateX(calc(-100% + 2px)); }
 .legend { display: flex; flex-wrap: wrap; gap: .4rem 1.25rem; margin: .9rem 0 0; padding: 0; list-style: none; font-size: var(--step--1); color: var(--muted); }
 .legend li { display: inline-flex; align-items: center; gap: .4rem; }
 .dot { display: inline-block; width: .65rem; height: .65rem; border-radius: 50%; background: var(--c); flex: none; }
+.hatch {
+  display: inline-block;
+  width: 1.1rem;
+  height: .65rem;
+  border-radius: 2px;
+  background: repeating-linear-gradient(135deg, color-mix(in oklab, var(--dust) 65%, transparent) 0 3px, transparent 3px 5px);
+}
 
 /* Month table */
 .table-card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow-x: auto; }
@@ -303,6 +325,31 @@ th.num, td.num { text-align: right; font-family: var(--font-mono); }
 td .dot { margin-right: .45rem; vertical-align: .05rem; }
 tr.is-current td { background: color-mix(in oklab, var(--rust) 10%, var(--surface)); }
 td.notes { color: var(--muted); }
+.m-dot, .m-note { display: none; }
+.m-note { margin-top: .15rem; font-size: var(--step--1); color: var(--muted); }
+
+/* Phones: month names run vertically so the whole year fits on screen; table notes move under the month name */
+@media (max-width: 40rem) {
+  .console { padding: 1rem; }
+  .ribbon-wrap { --rib-h: 6rem; }
+  .seg {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    align-items: center;
+    padding: .4rem 0;
+    font-size: .75rem;
+    border-left: 0;
+    border-right: 1px solid var(--surface);
+  }
+  .seg:first-child { border-right: 0; }
+  .seg small { display: none; }
+  .storm { color: transparent; }
+  table { min-width: 0; font-size: .9375rem; }
+  th, td { padding: .5rem .55rem; }
+  .col-season, .col-notes { display: none; }
+  .m-dot { display: inline-block; }
+  .m-note { display: block; }
+}
 
 /* Method */
 .method { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 1.5rem 2.5rem; align-items: start; }
@@ -324,6 +371,25 @@ footer .wrap { padding-block: 1.25rem 2rem; font-size: var(--step--1); color: va
   .marker, .seg, .console { transition: none; }
 }
 </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Хронометрія «Колонії»",
+  "alternateName": "Марсіанський календар «Нових Темних Віків»",
+  "description": "Конвертер дат між земним і марсіанським календарем роману Макса Кідрука «Нові Темні Віки. Колонія» за правилами додатка «Хронометрія».",
+  "inLanguage": "uk",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "Any",
+  "isAccessibleForFree": true,
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "UAH" },
+  "about": {
+    "@type": "Book",
+    "name": "Нові Темні Віки. Колонія",
+    "author": { "@type": "Person", "name": "Макс Кідрук" }
+  }
+}
+</script>
 </head>
 <body>
 <header class="band">
@@ -390,8 +456,8 @@ footer .wrap { padding-block: 1.25rem 2rem; font-size: var(--step--1); color: va
     <div class="scroll">
       <div class="ribbon-wrap" id="ribbonWrap">
         <div class="ribbon" id="ribbon"></div>
-        <div class="marker now" id="mkNow"><span class="tag">сьогодні</span></div>
-        <div class="marker sel" id="mkSel"><span class="tag" id="mkSelTag"></span></div>
+        <div class="marker mk-now" id="mkNow"><span class="tag">сьогодні</span></div>
+        <div class="marker mk-sel" id="mkSel"><span class="tag" id="mkSelTag"></span></div>
       </div>
     </div>
     <ul class="legend" id="legend"></ul>
@@ -405,7 +471,7 @@ footer .wrap { padding-block: 1.25rem 2rem; font-size: var(--step--1); color: va
     <div class="table-card">
       <table>
         <thead>
-          <tr><th class="num">№</th><th>Місяць</th><th class="num">Солів</th><th class="num">Перший сол</th><th>Пора року</th><th>Примітки</th></tr>
+          <tr><th class="num">№</th><th>Місяць</th><th class="num">Солів</th><th class="num">Перший сол</th><th class="col-season">Пора року</th><th class="col-notes">Примітки</th></tr>
         </thead>
         <tbody id="monthRows"></tbody>
       </table>
@@ -421,7 +487,7 @@ footer .wrap { padding-block: 1.25rem 2rem; font-size: var(--step--1); color: va
       <ol class="steps">
         <li><b>Земна дата стає юліанською.</b> Дата й час беруться в UTC. Для 23 вересня 2142, 12:00 UTC це JD 2 503 675, як на рис. 3 у книзі.</li>
         <li><b>Юліанська дата стає солами.</b> Відлік іде від 19 грудня 1975, 04:00 UTC: тоді Ls = 0 і почався 12-й марсіанський рік за Кленсі. Один сол триває 88 775,245 с.</li>
-        <li><b>Солі діляться на роки по 668,6 сола.</b> Ціла частина дає рік за Кленсі, залишок дає номер сола від 1 до 669. Останній, 669-й сол коротший за інші: 0,6 сола.</li>
+        <li><b>Соли діляться на роки по 668,6 сола.</b> Ціла частина дає рік за Кленсі, залишок дає номер сола від 1 до 669. Останній, 669-й сол коротший за інші: 0,6 сола.</li>
         <li><b>Номер сола дає місяць і день.</b> День = номер сола − перший сол місяця + 1. Наприклад, 443-й сол: 443 − 422 + 1 = Козеріг 22.</li>
         <li><b>Від року за Кленсі віднімається 54.</b> Виходить рік «Нових Темних Віків». За цими правилами рік 1 почався 3 листопада 2056 і тривав до 21 вересня 2058, тобто охопив 2057-й, рік висадки.</li>
       </ol>
@@ -667,13 +733,16 @@ function parseMarsText(text) {
 
   $('legend').innerHTML =
     ['весна', 'літо', 'осінь', 'зима'].map((s) => `<li><span class="dot" style="--c:${SEASON_VAR[s]}"></span>${s}</li>`).join('') +
+    '<li><span class="hatch"></span>сезон пилових бур</li>' +
     '<li>ВР, ОР — рівнодення</li><li>ЛС, ЗС — сонцестояння</li><li>А — афелій, П — перигелій</li>';
 
   $('monthRows').innerHTML = MONTHS.map((M, i) =>
-    `<tr data-i="${i}"><td class="num">${i + 1}</td><td><b>${M.name}</b></td>` +
+    `<tr data-i="${i}"><td class="num">${i + 1}</td>` +
+    `<td><span class="dot m-dot" style="--c:${SEASON_VAR[M.season]}"></span><b>${M.name}</b>` +
+    (M.note ? `<span class="m-note">${M.note}</span>` : '') + `</td>` +
     `<td class="num">${i === 11 ? '55 + 1' : M.sols}</td><td class="num">${M.start}</td>` +
-    `<td><span class="dot" style="--c:${SEASON_VAR[M.season]}"></span>${M.season}</td>` +
-    `<td class="notes">${M.note}</td></tr>`).join('');
+    `<td class="col-season"><span class="dot" style="--c:${SEASON_VAR[M.season]}"></span>${M.season}</td>` +
+    `<td class="notes col-notes">${M.note}</td></tr>`).join('');
 
   /* Selection shown on the ribbon and in the table */
   let active = 'e2m';
