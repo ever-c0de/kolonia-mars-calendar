@@ -240,6 +240,7 @@ h1 span { display: block; color: var(--dust); }
 .dial-band.is-sel { opacity: .75; }
 .dial-month { font: 500 13px var(--font-body); fill: var(--ink); letter-spacing: .02em; }
 .dial-evtick { stroke: var(--dust); stroke-width: 1.5; }
+.dial-storm line { stroke: var(--dust); stroke-width: 1.6; stroke-linecap: round; opacity: .8; }
 .dial-ev { font: 600 12px var(--font-mono); fill: var(--dust); }
 .sel-ring { fill: none; stroke: var(--dust); stroke-width: 2.2; }
 .sel-spoke { stroke: var(--dust); stroke-width: 1.3; stroke-dasharray: 3 3; }
@@ -1028,8 +1029,7 @@ function parseMarsText(text) {
     let s = `<defs>
       <radialGradient id="sunGlow"><stop offset="0" stop-color="#FFD59A" stop-opacity=".5"/><stop offset="1" stop-color="#FFD59A" stop-opacity="0"/></radialGradient>
       <radialGradient id="sunCore" cx="45%" cy="40%"><stop offset="0" stop-color="#FFF6DE"/><stop offset=".6" stop-color="#FFC56B"/><stop offset="1" stop-color="#F08A2C"/></radialGradient>
-      <radialGradient id="marsLit" cx="50%" cy="32%" fx="50%" fy="12%" r="78%"><stop offset="0" stop-color="#F7B48C"/><stop offset=".45" stop-color="#D2582A"/><stop offset="1" stop-color="#3B1408"/></radialGradient>
-      <pattern id="hatch" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="2" height="5" fill="#E9B27C" opacity=".8"/></pattern>`;
+      <radialGradient id="marsLit" cx="50%" cy="32%" fx="50%" fy="12%" r="78%"><stop offset="0" stop-color="#F7B48C"/><stop offset=".45" stop-color="#D2582A"/><stop offset="1" stop-color="#3B1408"/></radialGradient>`;
     MONTHS.forEach((M, i) => { s += labelArc('arc' + i, i * 30 + 1, i * 30 + 29, LABEL_R); });
     s += '</defs>';
     for (let i = 0; i < 12; i++) {
@@ -1040,7 +1040,13 @@ function parseMarsText(text) {
       s += `<path class="dial-band" data-i="${i}" d="${annulus(i * 30 + .5, i * 30 + 29.5, BAND_IN, BAND_OUT)}" style="fill:${SEASON_VAR[M.season]}"/>`;
       s += `<text class="dial-month" dominant-baseline="central"><textPath href="#arc${i}" startOffset="50%" text-anchor="middle">${M.name}</textPath></text>`;
     });
-    s += `<path d="${annulus(210, 300, 137, 142)}" fill="url(#hatch)"><title>Сезон пилових бур</title></path>`;
+    // Dust-storm season: short strokes laid along the arc so the hatching keeps the same angle to the orbit everywhere
+    let storm = '';
+    for (let a = 211; a < 299.5; a += 2.2) {
+      const [x0, y0] = P(136.5, a), [x1, y1] = P(142.5, a + 1.5);
+      storm += `<line x1="${f2(x0)}" y1="${f2(y0)}" x2="${f2(x1)}" y2="${f2(y1)}"/>`;
+    }
+    s += `<g class="dial-storm"><title>Сезон пилових бур</title>${storm}</g>`;
     EVENTS.forEach(([abbr, a, title]) => {
       const [x0, y0] = P(BAND_OUT + 2, a), [x1, y1] = P(BAND_OUT + 9, a), [tx, ty] = P(BAND_OUT + 20, a);
       s += `<g><title>${title}</title><line class="dial-evtick" x1="${f2(x0)}" y1="${f2(y0)}" x2="${f2(x1)}" y2="${f2(y1)}"/>` +
