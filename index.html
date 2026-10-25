@@ -33,7 +33,7 @@
   --muted: #A3ACBD;
   --dim: #808A9D;
   --mars: #E2683C;
-  --mars-hi: #F07B50;
+  --dust-hi: #F4C99A;
   --dust: #E9B27C;
   --ice: #8EC5E8;
   --spring: #9BCB7E;
@@ -73,7 +73,7 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; text
   z-index: -1;
   pointer-events: none;
   background:
-    radial-gradient(55vmax 45vmax at 88% 6%, rgba(226, 104, 60, .17), transparent 62%),
+    radial-gradient(55vmax 45vmax at 88% 6%, rgba(233, 178, 124, .12), transparent 62%),
     radial-gradient(40vmax 34vmax at 4% 96%, rgba(142, 197, 232, .06), transparent 62%);
 }
 .wrap {
@@ -96,7 +96,7 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; text
   border: 1px solid var(--line);
 }
 .hud::before {
-  --k: var(--mars);
+  --k: var(--dust);
   content: "";
   position: absolute;
   inset: -1px;
@@ -150,7 +150,7 @@ h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 600; text
   padding-block: 3.5rem 2rem;
 }
 @media (max-width: 60rem) { .hero { grid-template-columns: minmax(0, 1fr); padding-block: 2.25rem 1rem; } }
-.hero-text { display: grid; gap: 1.4rem; min-width: 0; }
+.hero-text { display: grid; gap: 1.4rem; min-width: 0; container-type: inline-size; }
 h1 {
   font-size: clamp(2.3rem, 1.3rem + 3.9vw, 4.1rem);
   line-height: 1;
@@ -158,8 +158,10 @@ h1 {
   letter-spacing: .015em;
   text-transform: uppercase;
 }
-h1 span { display: block; color: var(--mars); }
-.lede { color: var(--muted); font-size: 1.0625rem; max-width: 50ch; }
+h1 span { display: block; color: var(--dust); }
+/* One line: the text is ~33.2× its font size wide, so the size follows the column width */
+.lede { color: var(--muted); font-size: min(1.0625rem, 2.94cqi); white-space: nowrap; }
+@container (max-width: 30rem) { .lede { font-size: 1rem; white-space: normal; } }
 .readout { padding: 1.15rem 1.3rem 1.25rem; display: grid; gap: .3rem; max-width: 31rem; }
 .hud-label {
   display: flex;
@@ -174,17 +176,17 @@ h1 span { display: block; color: var(--mars); }
   width: .5rem;
   height: .5rem;
   border-radius: 50%;
-  background: var(--mars);
-  box-shadow: 0 0 10px var(--mars);
+  background: var(--dust);
+  box-shadow: 0 0 10px var(--dust);
   animation: blink 2s ease-in-out infinite;
 }
 .ro-date { font: 600 clamp(1.45rem, 1.15rem + 1.3vw, 1.95rem)/1.15 var(--font-display); margin-top: .35rem; }
 .ro-clock {
   font: 500 clamp(1.9rem, 1.35rem + 2.4vw, 2.75rem)/1.05 var(--font-mono);
   font-variant-numeric: tabular-nums;
-  color: var(--mars);
+  color: var(--dust);
   letter-spacing: .01em;
-  text-shadow: 0 0 22px rgba(226, 104, 60, .35);
+  text-shadow: 0 0 22px rgba(233, 178, 124, .3);
 }
 .ro-clock small {
   font-size: .3em;
@@ -216,8 +218,8 @@ h1 span { display: block; color: var(--mars); }
   cursor: pointer;
   transition: background-color .2s, color .2s, border-color .2s;
 }
-.btn-primary { background: var(--mars); color: var(--on-accent); border: 1px solid var(--mars); }
-.btn-primary:hover { background: var(--mars-hi); border-color: var(--mars-hi); }
+.btn-primary { background: var(--dust); color: var(--on-accent); border: 1px solid var(--dust); }
+.btn-primary:hover { background: var(--dust-hi); border-color: var(--dust-hi); }
 .btn-ghost { background: transparent; color: var(--ink); border: 1px solid var(--line-2); }
 .btn-ghost:hover { border-color: var(--dust); color: var(--dust); }
 
@@ -239,8 +241,8 @@ h1 span { display: block; color: var(--mars); }
 .dial-month { font: 500 13px var(--font-body); fill: var(--ink); letter-spacing: .02em; }
 .dial-evtick { stroke: var(--dust); stroke-width: 1.5; }
 .dial-ev { font: 600 12px var(--font-mono); fill: var(--dust); }
-.sel-ring { fill: none; stroke: var(--mars); stroke-width: 2.2; }
-.sel-spoke { stroke: var(--mars); stroke-width: 1.3; stroke-dasharray: 3 3; }
+.sel-ring { fill: none; stroke: var(--dust); stroke-width: 2.2; }
+.sel-spoke { stroke: var(--dust); stroke-width: 1.3; stroke-dasharray: 3 3; }
 .mars-pulse {
   fill: none;
   stroke: var(--ice);
@@ -284,7 +286,7 @@ h2 { font-size: clamp(1.65rem, 1.2rem + 1.7vw, 2.5rem); line-height: 1.08; lette
   transition: color .2s, border-color .2s, background-color .2s;
 }
 .tab:hover { color: var(--ink); background: rgba(255, 255, 255, .025); }
-.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--mars); background: rgba(226, 104, 60, .07); }
+.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--dust); background: rgba(233, 178, 124, .08); }
 .tabpanel { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); }
 @media (max-width: 56rem) { .tabpanel { grid-template-columns: minmax(0, 1fr); } }
 .fields {
@@ -369,7 +371,7 @@ input::-webkit-date-and-time-value { text-align: left; }
 .telemetry dt { font: 500 .75rem/1.25 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--dim); margin-bottom: .3rem; }
 .telemetry dd { margin: 0; font-size: .9375rem; line-height: 1.45; font-variant-numeric: tabular-nums; }
 .telemetry .utc { display: block; color: var(--dim); font-size: .8125rem; }
-.telemetry .hl dd { color: var(--mars); font-weight: 500; }
+.telemetry .hl dd { color: var(--dust); font-weight: 500; }
 .error { color: var(--mars); font-weight: 500; }
 
 /* Month grid */
@@ -395,7 +397,7 @@ input::-webkit-date-and-time-value { text-align: left; }
   transition: background-color .25s, box-shadow .25s;
 }
 .month.is-now { box-shadow: inset 0 0 0 1px rgba(142, 197, 232, .55); }
-.month.is-sel { background: linear-gradient(180deg, rgba(226, 104, 60, .13), rgba(11, 14, 20, .94) 70%); box-shadow: inset 0 0 0 1px rgba(226, 104, 60, .65); }
+.month.is-sel { background: linear-gradient(180deg, rgba(233, 178, 124, .12), rgba(11, 14, 20, .94) 70%); box-shadow: inset 0 0 0 1px rgba(233, 178, 124, .6); }
 .m-top { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
 .m-num { font: 500 .75rem/1 var(--font-mono); letter-spacing: .1em; color: var(--dim); }
 .m-season { display: inline-flex; align-items: center; gap: .4rem; font-size: .75rem; color: var(--muted); }
@@ -408,7 +410,7 @@ input::-webkit-date-and-time-value { text-align: left; }
 .m-badges:empty { display: none; }
 .badge { padding: .3rem .5rem; border-radius: 2px; font: 600 .75rem/1 var(--font-mono); letter-spacing: .06em; text-transform: uppercase; }
 .badge.now { background: rgba(142, 197, 232, .14); color: var(--ice); }
-.badge.sel { background: rgba(226, 104, 60, .17); color: var(--mars); }
+.badge.sel { background: rgba(233, 178, 124, .16); color: var(--dust); }
 
 /* Method slider */
 .slider-bar {
@@ -479,7 +481,7 @@ input::-webkit-date-and-time-value { text-align: left; }
 .dot { width: 44px; height: 44px; display: grid; place-items: center; background: transparent; border: 0; cursor: pointer; }
 .dot::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--line-2); transition: background-color .2s, transform .2s; }
 .dot:hover::before { background: var(--dust); }
-.dot[aria-current="step"]::before { background: var(--mars); transform: scale(1.35); }
+.dot[aria-current="step"]::before { background: var(--dust); transform: scale(1.35); }
 
 /* Martian time */
 .time-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 2rem 3.5rem; align-items: center; }
@@ -615,7 +617,7 @@ footer .wrap {
       </svg>
       <figcaption class="dial-legend">
         <span><svg width="16" height="16" viewBox="-8 -8 16 16" aria-hidden="true"><circle r="6" fill="#D2582A"/></svg>Марс сьогодні</span>
-        <span><svg width="16" height="16" viewBox="-8 -8 16 16" aria-hidden="true"><circle r="6" fill="none" stroke="#E2683C" stroke-width="2"/></svg>Обрана дата</span>
+        <span><svg width="16" height="16" viewBox="-8 -8 16 16" aria-hidden="true"><circle r="6" fill="none" stroke="#E9B27C" stroke-width="2"/></svg>Обрана дата</span>
         <span><svg width="20" height="10" viewBox="0 0 20 10" aria-hidden="true"><rect width="20" height="10" fill="url(#hatchLegend)"/><defs><pattern id="hatchLegend" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="2" height="5" fill="#E9B27C"/></pattern></defs></svg>Пилові бурі</span>
         <span>ВР, ОР рівнодення · ЛС, ЗС сонцестояння · А афелій · П перигелій</span>
       </figcaption>
